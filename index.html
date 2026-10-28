@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#101827"><meta name="description" content="Free mobile-friendly SGPA and CGPA calculator for JNTUA B.Tech students.">
+<meta name="theme-color" content="#101827"><link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/jntua-hub.svg" type="image/svg+xml">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="JNTUA Hub"><meta name="description" content="Free mobile-friendly SGPA and CGPA calculator for JNTUA B.Tech students.">
 <title>JNTUA Student Hub</title>
 <style>
 :root{--bg:#0b1020;--panel:#121a2d;--text:#f4f7ff;--muted:#9eabc4;--line:#283650;--brand:#aab5ff;--mint:#5de0c1}
@@ -273,4 +276,10 @@ try {
   }
 } catch (_) {}
 update();
+</script><script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(console.error);
+  });
+}
 </script></body></html>
