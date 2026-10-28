@@ -1,0 +1,15 @@
+[
+  {
+    "regulation": "R23",
+    "branch": "CSE",
+    "semester": "1-1",
+    "name": "R23 CSE 1-1 (replace with verified official subjects)",
+    "subjects": [
+      {
+        "code": "SUBJECT_CODE",
+        "name": "Replace with official subject name",
+        "credits": 3
+      }
+    ]
+  }
+]
