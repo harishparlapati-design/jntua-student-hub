@@ -1,0 +1,22 @@
+JNTUA Student Hub — PWA setup
+Repository: https://github.com/harishparlapati-design/jntua-student-hub
+
+1. Upload manifest.webmanifest, sw.js, and the icons/ folder into the repository root.
+2. Inside <head> in index.html, add:
+   <link rel="manifest" href="./manifest.webmanifest">
+   <link rel="icon" href="./icons/jntua-hub.svg" type="image/svg+xml">
+   <meta name="apple-mobile-web-app-capable" content="yes">
+   <meta name="apple-mobile-web-app-title" content="JNTUA Hub">
+3. Before </body> in index.html, add:
+   <script>
+   if ("serviceWorker" in navigator) {
+     window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(console.error));
+   }
+   </script>
+4. Commit changes and wait for GitHub Pages to publish.
+5. Android Chrome: open the live site > browser menu > Install app / Add to Home screen.
+   Desktop Chrome: menu > Install page as app.
+
+Offline caching is for the app shell. Google sign-in and Drive backup/restore require internet.
+Ensure the chosen domain has a valid HTTPS certificate before using OAuth or packaging the Android app.
+Next stage: package an Android app using a browser-based/TWA approach, so Google sign-in runs in a real browser rather than an embedded WebView.
