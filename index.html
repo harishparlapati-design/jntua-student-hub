@@ -51,6 +51,63 @@
 <section class="page" id="page-history"><div class="card"><h3>Academic history</h3><p class="sub">Saved in this browser on this device.</p><div id="historyList" class="empty">No saved semesters yet.</div><div class="actions"><button class="btn secondary" id="exportData">Export my data (JSON)</button><button class="btn danger" id="clearHistory">Clear history</button></div></div></section>
 <section class="page" id="page-backlogs"><div class="card"><h3>Backlog tracker</h3><p class="sub">Track subjects yourself. This list does not automatically change official SGPA/CGPA.</p><div class="fields"><div class="field"><label>Subject name or code</label><input id="backlogName" placeholder="e.g. Engineering Mathematics"></div><div class="field"><label>Semester</label><select id="backlogSem"><option>1-1</option><option>1-2</option><option>2-1</option><option>2-2</option><option>3-1</option><option>3-2</option><option>4-1</option><option>4-2</option></select></div></div><div class="actions"><button class="btn" id="addBacklog">＋ Add backlog</button></div><div id="backlogList" class="empty" style="margin-top:10px">No backlogs recorded.</div></div></section>
 <section class="page" id="page-guide"><div class="card"><h3>Regulation guide</h3><p class="sub">Regulation names are selectable, but official rules and subject data have not yet been verified.</p><div class="field"><label>Choose regulation</label><select id="regGuide"><option>R23</option><option>R20</option><option>R19</option><option>R15</option><option>Other / not sure</option></select></div><div class="notice" style="margin-top:14px">Until official documents are checked, enter credits and grade points manually. Do not assume all regulations use identical rules.</div><p><a href="https://www.jntua.ac.in/" target="_blank" rel="noopener">Visit JNTUA official website ↗</a></p><p class="sub">This independent tool is not affiliated with JNTUA.</p></div></section>
+
+<section class="page" id="page-papers">
+  <div class="card">
+    <h3>Previous Question Papers 📚</h3>
+    <p class="sub">Find question papers by regulation, semester, branch and subject.</p>
+
+    <div class="fields">
+      <div class="field">
+        <label>Regulation</label>
+        <select id="paperReg">
+          <option value="">Select regulation</option>
+          <option>R23</option>
+          <option>R20</option>
+          <option>R19</option>
+          <option>R15</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Semester</label>
+        <select id="paperSem">
+          <option value="">Select semester</option>
+          <option>1-1</option><option>1-2</option>
+          <option>2-1</option><option>2-2</option>
+          <option>3-1</option><option>3-2</option>
+          <option>4-1</option><option>4-2</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Branch</label>
+        <select id="paperBranch">
+          <option value="">Select branch</option>
+          <option>CSE</option><option>ECE</option>
+          <option>EEE</option><option>Mechanical Engineering</option>
+          <option>Civil Engineering</option><option>IT</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Subject</label>
+        <select id="paperSubject">
+          <option value="">Select subject</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="searchPapers">Search Papers</button>
+    </div>
+
+    <div id="paperResults" class="empty">
+      Select your details and search for question papers.
+    </div>
+  </div>
+</section>
+
 </main></div>
 <div class="install-overlay" id="installModal" role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
   <div class="install-dialog">
