@@ -14,6 +14,7 @@ supabaseScript.onload = () => {
   );
 
   console.log("JNTUA Student Hub connected to Supabase");
+  window.dispatchEvent(new Event("supabase-ready"));
 };
-window.dispatchEvent(new Event("supabase-ready"));
+
 document.head.appendChild(supabaseScript);
