@@ -105,42 +105,41 @@
     <div id="paperResults" class="empty">
       Select your details and search for question papers.
     </div>
-    
-<div class="card">
-  <h3>Student Login & Paper Upload</h3>
-  <p class="sub">Sign in with your email to upload previous question papers.</p>
-
-  <div class="fields">
-    <div class="field">
-      <label>Email address</label>
-      <input type="email" id="paperEmail" placeholder="Enter your email">
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="paperPassword" placeholder="Enter password">
-    </div>
   </div>
 
-  <div class="actions">
-    <button class="btn" id="paperSignUp">Create Account</button>
-    <button class="btn secondary" id="paperSignIn">Sign In</button>
-    <button class="btn danger" id="paperSignOut" style="display:none">Sign Out</button>
-  </div>
+  <div class="card">
+  <h3>Upload Previous Question Paper</h3>
+  <p class="sub">Upload previous question papers for other students.</p>
 
-  <p class="sub" id="paperAuthStatus">Not signed in.</p>
+  <!-- Hidden login elements retained for JavaScript compatibility -->
+  <div hidden>
+    <input type="email" id="paperEmail">
+    <input type="password" id="paperPassword">
+
+    <button id="paperSignUp">Create Account</button>
+    <button id="paperSignIn">Sign In</button>
+    <button id="paperSignOut">Sign Out</button>
+
+    <p id="paperAuthStatus">Not signed in.</p>
+  </div>
 
   <div class="field">
     <label>Select question paper (PDF or image)</label>
-    <input type="file" id="paperFile" accept=".pdf,.jpg,.jpeg,.png,.webp">
+    <input
+      type="file"
+      id="paperFile"
+      accept=".pdf,.jpg,.jpeg,.png,.webp"
+    >
   </div>
 
   <div class="actions">
-    <button class="btn" id="paperUpload">Upload Question Paper</button>
+    <button class="btn" id="paperUpload">
+      Upload Question Paper
+    </button>
   </div>
 
   <p class="sub" id="paperUploadStatus"></p>
 </div>
-    
   </div>
 </section>
 
