@@ -125,10 +125,6 @@
   $("paperUpload").addEventListener("click", async () => {
     if (!supabase) return alert("Supabase is still loading.");
 
-    if (!currentUser) {
-      return alert("Please sign in before uploading.");
-    }
-
     const file = $("paperFile").files[0];
 
     if (!file) return alert("Choose a question paper first.");
@@ -160,8 +156,9 @@
     status("paperUploadStatus", "Uploading paper...");
 
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const filePath =
-      currentUser.id + "/" + Date.now() + "_" + safeName;
+    // Anonymous uploads use the public-inbox folder.
+const uploadFolder = currentUser ? currentUser.id : "public-inbox";
+const filePath = uploadFolder + "/" + Date.now() + "_" + safeName;
 
     try {
       const { error: uploadError } = await supabase.storage
@@ -186,7 +183,7 @@
           file_name: file.name,
           file_path: filePath,
           file_type: file.type,
-          uploaded_by: currentUser.id
+          uploaded_by: currentUser ? currentUser.id : null
         });
 
       if (insertError) {
