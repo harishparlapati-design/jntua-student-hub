@@ -106,8 +106,6 @@
     ["regS","branchS","semS"].forEach(id=>$(id)?.addEventListener("change",()=>loadSubjectsForSgpa().catch(console.error)));
     ["paperReg","paperBranch","paperSem"].forEach(id=>$(id)?.addEventListener("change",()=>loadPaperSubjects().catch(console.error)));
     $("regGuide")?.addEventListener("change",updateRegulationDetails);
-    $("extractRegulation")?.addEventListener("click",extractPdf);
-    $("publishRegulation")?.addEventListener("click",publish);
   }
   async function ensurePdfJs(){
     if(window.pdfjsLib)return;
