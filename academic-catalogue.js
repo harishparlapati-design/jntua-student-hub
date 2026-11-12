@@ -6,6 +6,7 @@
   "use strict";
   const $ = id => document.getElementById(id);
   const state = { colleges: [], regulations: [], branches: [], semesters: [], subjects: [], extracted: [], pdfText: "" };
+  let eventsBound = false;
   const client = () => window.supabaseClient || null;
   const val = id => $(id)?.value || "";
   const setOptions = (id, rows, label, value, first = "Select") => {
@@ -102,6 +103,8 @@
     if($("regulationDetails"))$("regulationDetails").textContent=r?`${r.regulation_code}: ${r.regulation_name}. ${r.start_year ? "Starting year: "+r.start_year+". " : ""}Subject data is shown only after official course structures have been reviewed and published.`:"Choose a college and regulation.";
   }
   function bind(){
+    if (eventsBound) return;
+    eventsBound = true;
     ["collegeS","collegeGuide","paperCollege"].forEach(id=>$(id)?.addEventListener("change",refreshRegulations));
     ["regS","branchS","semS"].forEach(id=>$(id)?.addEventListener("change",()=>loadSubjectsForSgpa().catch(console.error)));
     ["paperReg","paperBranch","paperSem"].forEach(id=>$(id)?.addEventListener("change",()=>loadPaperSubjects().catch(console.error)));
@@ -196,6 +199,13 @@
       refreshRegulations();
     }catch(e){message("Publish failed: "+e.message)}
   }
+  // V4 wizard compatibility: retain the original catalogue implementation and expose a safe reload hook.
+  window.JSHV4 = {
+    reload: () => loadBase(),
+    branches: () => state.branches,
+    semesters: () => state.semesters,
+    regulations: () => state.regulations
+  };
   window.addEventListener("supabase-ready",()=>loadBase().catch(e=>message("Catalogue error: "+e.message)));
   if(client())loadBase().catch(e=>message("Catalogue error: "+e.message));
   // A periodic read refreshes published regulation choices; it does not crawl external websites.
