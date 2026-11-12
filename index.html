@@ -77,7 +77,7 @@ body{background:#f4f7fb;color:#172033}.hero{background:linear-gradient(120deg,#e
 <div id="googleProfile" style="display:none;align-items:center;gap:12px;margin:10px 0 14px"><img id="googlePhoto" alt="Google profile photo" style="width:54px;height:54px;border-radius:50%;object-fit:cover;display:none"><div><strong id="googleName"></strong><p class="sub" id="googleEmail" style="margin:4px 0 0"></p></div></div>
 <p class="sub" id="googleIntro">Sign in securely with your Google account to access your JNTUA Student Hub. Keep your academic journey organized in one place.</p>
 <p id="googleStatus" class="sub">Not signed in.</p>
-<div class="actions"><button class="btn" id="googleConnect">Sign in with Google</button><button class="btn secondary" id="driveSave" hidden disabled>Back up to my Drive</button><button class="btn secondary" id="driveRestore" hidden disabled>Restore from my Drive</button></div>
+<div class="actions"><button class="btn" id="googleConnect">Sign in with Google</button><button class="btn secondary" id="googleSignOut" style="display:none">Sign out</button><button class="btn secondary" id="driveSave" hidden disabled>Back up to my Drive</button><button class="btn secondary" id="driveRestore" hidden disabled>Restore from my Drive</button></div>
 <p class="sub" id="googlePrivacy">Your Google account is used for sign-in. Never enter your Google password into this website.</p></div>
 
 <div class="card" style="border:1px solid rgba(93,224,193,.28);background:linear-gradient(120deg,rgba(35,100,91,.15),rgba(18,26,45,.96))"><h3>Previous Question Papers (PQP) 📚</h3><p class="sub">Find and access previous question papers for your JNTUA B.Tech subjects.</p><div class="actions"><button class="btn" data-go="papers">Open Previous Papers →</button></div></div>
@@ -168,11 +168,11 @@ body{background:#f4f7fb;color:#172033}.hero{background:linear-gradient(120deg,#e
 <select id="adminCollege"></select><select id="paperCollege"></select>
 </div>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 
 <script>
 
-const $=id=>document.getElementById(id);const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v));if((k==='jsh_semesters'||k==='jsh_backlogs')&&typeof googleAccessToken!=='undefined'&&googleAccessToken){clearTimeout(window.jshDriveSaveTimer);window.jshDriveSaveTimer=setTimeout(()=>saveToDrive(true),1200)}};let semesters=read('jsh_semesters',[]),backlogs=read('jsh_backlogs',[]),last=null;
+const $=id=>document.getElementById(id);const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v));if(k==='jsh_semesters'||k==='jsh_backlogs')window.dispatchEvent(new CustomEvent('jsh-data-changed',{detail:{key:k}}))};let semesters=read('jsh_semesters',[]),backlogs=read('jsh_backlogs',[]),last=null;
 
 function esc(s){return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
 
@@ -210,337 +210,9 @@ $('clearHistory').onclick=()=>{if(confirm('Delete all saved semester history fro
 
 
 
-// Google Sign-In + per-student Google Drive backup.
+// Google sign-in and cloud sync are handled by student-sync.js.
 
-// The Client ID is public by design; never put a Client Secret in browser code.
 
-const GOOGLE_CLIENT_ID = "186158388033-gbp0goraj9lh3ri8cfdsg6fk639fmusa.apps.googleusercontent.com";
-
-const DRIVE_SCOPE = "";
-
-let googleTokenClient = null;
-
-let googleAccessToken = null;
-
-let googleUserEmail = "";
-
-
-
-function googleStatus(message) {
-
-  const el = $("googleStatus");
-
-  if (el) el.textContent = message;
-
-}
-
-function showGoogleProfile(user) {
-
-  const name = user.name || (user.email ? user.email.split("@")[0] : "Student");
-
-  const firstName = name.trim().split(/\s+/)[0] || "Student";
-
-  googleUserEmail = user.email || googleUserEmail || "Google account";
-
-  $("googleName").textContent = name;
-
-  $("googleEmail").textContent = googleUserEmail;
-
-  $("googleProfile").style.display = "flex";
-
-  $("googleCardTitle").textContent = "Google Drive connected";
-
-  $("googleIntro").textContent = "Your academic backup is linked to your Google account.";
-
-  $("googlePrivacy").style.display = "none";
-
-  $("googleConnect").style.display = "none";
-
-  $("heroFirstName").textContent = firstName + "'s semester.";
-
-  const avatar = $("brandAvatar");
-
-  if (user.picture) {
-
-    $("googlePhoto").src = user.picture;
-
-    $("googlePhoto").style.display = "block";
-
-    avatar.innerHTML = "";
-
-    avatar.style.padding = "0";
-
-    avatar.style.overflow = "hidden";
-
-    avatar.innerHTML = '<img src="' + user.picture.replace(/&/g, "&amp;").replace(/"/g, "&quot;") + '" alt="Google profile" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">';
-
-  } else {
-
-    avatar.textContent = firstName.charAt(0).toUpperCase();
-
-  }
-
-}
-
-function setDriveButtons(enabled) {
-
-  $("driveSave").disabled = !enabled;
-
-  $("driveRestore").disabled = !enabled;
-
-}
-
-function waitForGoogleIdentity() {
-
-  return new Promise((resolve, reject) => {
-
-    let tries = 0;
-
-    const check = () => {
-
-      if (window.google && google.accounts && google.accounts.oauth2) return resolve();
-
-      if (++tries > 40) return reject(new Error("Google sign-in could not load. Check your internet connection and refresh."));
-
-      setTimeout(check, 250);
-
-    };
-
-    check();
-
-  });
-
-}
-
-async function connectGoogle() {
-
-  try {
-
-    googleStatus("Opening Google sign-in…");
-
-    await waitForGoogleIdentity();
-
-    googleTokenClient = google.accounts.oauth2.initTokenClient({
-
-      client_id: GOOGLE_CLIENT_ID,
-
-      scope: "openid email profile",
-
-      include_granted_scopes: true,
-
-      callback: async (response) => {
-
-        if (response.error || !response.access_token) {
-
-          googleStatus("Google connection failed: " + (response.error_description || response.error || "No access token returned."));
-
-          return;
-
-        }
-
-        googleAccessToken = response.access_token;
-
-        try {
-
-          const r = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-
-            headers: { Authorization: "Bearer " + googleAccessToken }
-
-          });
-
-          if (!r.ok) throw new Error("Could not read Google account information.");
-
-          const user = await r.json();
-
-          googleUserEmail = user.email || "Google account";
-
-          showGoogleProfile(user);
-
-          setDriveButtons(true);
-
-          googleStatus("Signed in successfully.");
-
-        } catch (e) {
-
-          googleStatus(e.message || "Connected, but could not verify account.");
-
-        }
-
-      },
-
-      error_callback: (err) => googleStatus("Google sign-in window issue: " + (err.message || err.type || "Please try again."))
-
-    });
-
-    googleTokenClient.requestAccessToken({ prompt: "consent" });
-
-  } catch (e) {
-
-    googleStatus(e.message || "Google sign-in could not start.");
-
-  }
-
-}
-
-async function driveApi(url, options = {}) {
-
-  if (!googleAccessToken) throw new Error("Connect your Google account first.");
-
-  const response = await fetch(url, {
-
-    ...options,
-
-    headers: { Authorization: "Bearer " + googleAccessToken, ...(options.headers || {}) }
-
-  });
-
-  if (!response.ok) {
-
-    const detail = await response.text();
-
-    throw new Error("Google Drive request failed (" + response.status + "). " +
-
-      (response.status === 401 ? "Reconnect Google and try again." :
-
-       response.status === 403 ? "Check that Google Drive API is enabled and the Drive permission is configured." : detail.slice(0, 220)));
-
-  }
-
-  return response;
-
-}
-
-async function findBackupFile() {
-
-  const q = encodeURIComponent("name = 'jntua-student-hub-backup.json' and trashed = false");
-
-  const r = await driveApi("https://www.googleapis.com/drive/v3/files?q=" + q + "&fields=files(id,name,modifiedTime)&pageSize=100");
-
-  const data = await r.json();
-
-  return (data.files || [])[0] || null;
-
-}
-
-function currentBackupData() {
-
-  return { app: "JNTUA Student Hub", version: 1, email: googleUserEmail,
-
-    semesters, backlogs, savedAt: new Date().toISOString() };
-
-}
-
-async function saveToDrive(silent = false) {
-
-  try {
-
-    if (!googleAccessToken) throw new Error("Tap “Sign in with Google + Connect Drive” first.");
-
-    const existing = await findBackupFile();
-
-    const metadata = { name: "jntua-student-hub-backup.json", mimeType: "application/json" };
-
-    const boundary = "jsh_" + Math.random().toString(16).slice(2);
-
-    const body = JSON.stringify(currentBackupData(), null, 2);
-
-    const multipart = "--" + boundary + "\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n" +
-
-      JSON.stringify(metadata) + "\r\n--" + boundary + "\r\nContent-Type: application/json\r\n\r\n" +
-
-      body + "\r\n--" + boundary + "--";
-
-    const url = existing
-
-      ? "https://www.googleapis.com/upload/drive/v3/files/" + encodeURIComponent(existing.id) + "?uploadType=multipart"
-
-      : "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-
-    const r = await driveApi(url, {
-
-      method: existing ? "PATCH" : "POST",
-
-      headers: { "Content-Type": "multipart/related; boundary=" + boundary },
-
-      body: multipart
-
-    });
-
-    await r.json();
-
-    googleStatus("Backup saved to " + googleUserEmail + "'s Google Drive at " + new Date().toLocaleTimeString() + ".");
-
-    return true;
-
-  } catch (e) {
-
-    googleStatus(e.message || "Could not save to Google Drive.");
-
-    if (!silent) alert(e.message || "Could not save to Google Drive.");
-
-    return false;
-
-  }
-
-}
-
-async function restoreFromDrive() {
-
-  try {
-
-    if (!googleAccessToken) throw new Error("Connect your Google account first.");
-
-    const file = await findBackupFile();
-
-    if (!file) {
-
-      alert("No JNTUA Student Hub backup was found in this Google Drive. If you have records on this device, tap Back up to my Drive first.");
-
-      return;
-
-    }
-
-    const r = await driveApi("https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(file.id) + "?alt=media");
-
-    const data = await r.json();
-
-    if (!data || data.app !== "JNTUA Student Hub" || !Array.isArray(data.semesters) || !Array.isArray(data.backlogs)) {
-
-      throw new Error("The selected Drive file does not look like a valid JNTUA Student Hub backup.");
-
-    }
-
-    if (!confirm("Restore " + data.semesters.length + " semester record(s) and " + data.backlogs.length + " backlog record(s)? This replaces the records currently on this device.")) return;
-
-    semesters = data.semesters;
-
-    backlogs = data.backlogs;
-
-    write("jsh_semesters", semesters);
-
-    write("jsh_backlogs", backlogs);
-
-    update();
-
-    googleStatus("Restored records from " + googleUserEmail + "'s Google Drive.");
-
-    alert("Academic records restored successfully.");
-
-  } catch (e) {
-
-    googleStatus(e.message || "Could not restore backup.");
-
-    alert(e.message || "Could not restore backup.");
-
-  }
-
-}
-
-$("googleConnect").onclick = connectGoogle;
-
-$("driveSave").onclick = () => saveToDrive(false);
-
-$("driveRestore").onclick = restoreFromDrive;
 
 
 
@@ -556,5 +228,7 @@ update();
 
 <script src="./papers.js"></script>
 <script src="./regulation-wizard-v4.js"></script>
+
+<script src="./student-sync.js"></script>
 
 </body></html>
