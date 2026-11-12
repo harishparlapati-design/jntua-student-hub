@@ -5,7 +5,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_iI3RWnBxNYhujLo7pCh_mw_6-jU56bl";
 
 const supabaseScript = document.createElement("script");
 supabaseScript.src =
-  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0";
 
 supabaseScript.onload = () => {
   window.supabaseClient = window.supabase.createClient(
