@@ -11,69 +11,39 @@
 
 :root{--bg:#f4f7fb;--panel:#fff;--text:#172033;--muted:#667085;--line:#e3e8f0;--brand:#315efb;--mint:#0f9d80}
 body{background:#f4f7fb;color:#172033}.hero{background:linear-gradient(120deg,#eaf0ff,#f5fbff);border-color:#dbe4ff}
-.stat,.card{background:#fff;border-color:#e3e8f0;box-shadow:0 5px 18px rgba(16,24,40,.045)}
+.stat,.card{background:#fff;color:#172033;border-color:#e3e8f0;box-shadow:0 5px 18px rgba(16,24,40,.045)}
 .nav button{color:#667085}.nav button.active,.nav button:hover{background:#eaf0ff;border-color:#d5e0ff;color:#2448c7}
 .field label{color:#475467}.field input,.field select,td input{background:#fff;color:#172033;border-color:#d0d7e2}
 .notice{background:#fff8e7;color:#7a4b00;border-color:#f4dfaa}.btn{background:#315efb;color:#fff}
-.btn.secondary{background:#fff;color:#344054;border-color:#d0d7e2}.pill{background:#eef4ff;color:#2448c7;border-color:#d5e0ff}
-.reg-list{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.reg-chip{border:1px solid #d5e0ff;background:#eef4ff;color:#2448c7;padding:10px 18px;border-radius:12px;font-weight:800}
-.modal-backdrop{position:fixed;inset:0;background:rgba(16,24,40,.48);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}.modal-backdrop.open{display:flex}
-.modal{background:#fff;color:#172033;border-radius:18px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.method-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.method-tabs button{border:1px solid #d0d7e2;background:#fff;color:#344054;padding:9px 13px;border-radius:10px}
-.method-tabs button.active{background:#eef4ff;border-color:#9db4ff;color:#2448c7}
-@media(max-width:700px){.modal{padding:16px}}
+.btn.secondary{background:#fff;color:#344054;border:1px solid #d0d7e2}
+.inline-select{display:flex;gap:8px;align-items:center}.inline-select select{flex:1;min-width:0}
+.modal-backdrop{position:fixed;inset:0;background:rgba(16,24,40,.48);display:none;align-items:center;justify-content:center;padding:14px;z-index:9999}
+.modal-backdrop.open{display:flex}.modal{background:#fff;color:#172033;border-radius:18px;max-width:900px;width:100%;max-height:92vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h2{margin:0 0 4px}.modal .muted{color:#667085;font-size:13px}.wizard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.subject-editor{width:100%;border-collapse:collapse}.subject-editor input{width:100%;min-width:100px;padding:9px;border:1px solid #d0d7e2;border-radius:8px}
+.wizard-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.wizard-status{padding:10px;background:#eff6ff;border-radius:10px;color:#2448c7;margin-top:12px;font-size:13px}
+@media(max-width:650px){.inline-select{align-items:stretch;flex-direction:column}.wizard-grid{grid-template-columns:1fr}.modal{padding:15px}}
 </style>
 </head>
 <body><div class="shell">
 <header class="top"><div class="brand"><div class="logo" id="brandAvatar">J</div><div><h1>JNTUA Student Hub</h1><p>Your academic companion</p></div></div><span class="pill">FREE · BETA</span></header>
 <section class="hero"><div class="eyebrow">Built for B.Tech students</div><h2><span id="heroFirstName">Your semester.</span><br>Made simpler.</h2><p>Calculate SGPA and CGPA, keep a record of semesters, and track your academic journey. No account required for calculations.</p></section>
 <div class="stats"><div class="stat"><span>Overall CGPA</span><strong id="statCgpa">—</strong><small>From saved semester records</small></div><div class="stat"><span>Semesters saved</span><strong id="statSemesters">0</strong><small>On this device</small></div><div class="stat"><span>Active backlogs</span><strong id="statBacklogs">0</strong><small>Manually recorded</small></div></div>
-<div class="layout"><aside class="nav"><button class="active" data-page="home">⌂ Overview</button><button data-page="sgpa">∑ SGPA Calculator</button><button data-page="cgpa">◈ CGPA Calculator</button><button data-page="history">▤ History</button><button data-page="backlogs">✓ Backlogs</button><button data-page="guide">▣ Regulations</button><button data-page="papers">▤ Previous Papers</button></aside>
+<div class="layout"><aside class="nav"><button class="active" data-page="home">⌂ Overview</button><button data-page="sgpa">∑ SGPA Calculator</button><button data-page="cgpa">◈ CGPA Calculator</button><button data-page="history">▤ History</button><button data-page="backlogs">✓ Backlogs</button><button data-page="guide">▣ Regulations</button></aside>
 <main class="content">
 <section class="page active" id="page-home">
 <div class="card" id="googleCard"><h3 id="googleCardTitle">Google account & Drive backup</h3><div id="googleProfile" style="display:none;align-items:center;gap:12px;margin:10px 0 14px"><img id="googlePhoto" alt="Google profile photo" style="width:54px;height:54px;border-radius:50%;object-fit:cover;display:none"><div><strong id="googleName"></strong><p class="sub" id="googleEmail" style="margin:4px 0 0"></p></div></div><p class="sub" id="googleIntro">Connect your own Google account to back up and restore your JNTUA Student Hub records in your own Google Drive.</p><p id="googleStatus" class="sub">Not connected. Your data is currently saved only in this browser.</p><div class="actions"><button class="btn" id="googleConnect">Sign in with Google + Connect Drive</button><button class="btn secondary" id="driveSave" disabled>Back up to my Drive</button><button class="btn secondary" id="driveRestore" disabled>Restore from my Drive</button></div><p class="sub" id="googlePrivacy">This app requests permission to manage only files it creates or files you explicitly select. Never enter your Google password into this website.</p></div>
-<div class="card"><h3>Welcome to your Student Hub 👋</h3><p class="sub">Choose a tool to get started. Your records are saved in this browser on this device.</p><div class="fields"><button class="btn" data-go="sgpa">Calculate SGPA →</button><button class="btn secondary" data-go="cgpa">Calculate CGPA →</button><button class="btn secondary" data-go="history">Academic history</button><button class="btn secondary" data-go="backlogs">Track backlogs</button></div></div><div class="notice"><b>Important:</b> This is an independent student project, not an official JNTUA website. Confirm subject credits, grading, and regulation-specific rules from official documents.</div><div class="card"><h3>Recent semesters</h3><div id="homeRecent" class="empty">No semesters saved yet. Calculate an SGPA and save it to begin.</div></div></section>
-<section class="page" id="page-sgpa"><div class="card"><h3>SGPA Calculator</h3><p class="sub">SGPA = Σ(credits × grade points) ÷ Σ(credits).</p><div class="notice">Choose the letter grade from the JNTUA grading table. Grade points are filled automatically. Enter the subject credits shown in your official regulation/marks memo.</div><div class="fields"><div class="field"><label>Regulation</label><select id="regS"><option value="">Loading regulations…</option></select></div><div class="field"><label>Semester</label><select id="semS"><option>1-1</option><option>1-2</option><option>2-1</option><option>2-2</option><option>3-1</option><option>3-2</option><option>4-1</option><option>4-2</option></select></div><div class="field"><label>Branch (optional)</label><select id="branchS"><option value="">Select branch</option><option>CSE</option><option>ECE</option><option>EEE</option><option>Mechanical Engineering</option><option>Civil Engineering</option><option>IT</option><option>Other</option></select></div><div class="field"><label>Record label (optional)</label><input id="attemptS" placeholder="e.g. Regular exams"></div></div><div class="tablewrap" style="margin-top:15px"><table><thead><tr><th>Subject</th><th>Credits</th><th>Letter grade (grade points)</th><th></th></tr></thead><tbody id="subjects"></tbody></table></div><div class="actions"><button class="btn secondary" id="addSubject">＋ Add subject</button><button class="btn" id="calcSgpa">Calculate SGPA</button></div><div class="result" id="sgpaResult"><span>Calculated SGPA</span><strong id="sgpaValue">0.00</strong><span id="sgpaDetails"></span><div class="actions"><button class="btn" id="saveSemester">Save semester</button></div></div></div></section>
+<div class="card"><h3>Welcome to your Student Hub 👋</h3><p class="sub">Choose a tool to get started. Your records are saved in this browser on this device.</p><div class="fields"><button class="btn" data-go="sgpa">Calculate SGPA →</button><button class="btn secondary" data-go="cgpa">Calculate CGPA →</button><button class="btn secondary" data-go="papers">Previous Question Papers</button><button class="btn secondary" data-go="history">Academic history</button><button class="btn secondary" data-go="backlogs">Track backlogs</button></div></div><div class="notice"><b>Important:</b> This is an independent student project, not an official JNTUA website. Confirm subject credits, grading, and regulation-specific rules from official documents.</div><div class="card"><h3>Recent semesters</h3><div id="homeRecent" class="empty">No semesters saved yet. Calculate an SGPA and save it to begin.</div></div></section>
+<section class="page" id="page-sgpa"><div class="card"><h3>SGPA Calculator</h3><p class="sub">SGPA = Σ(credits × grade points) ÷ Σ(credits).</p><div class="notice">Choose the letter grade from the JNTUA grading table. Grade points are filled automatically. Enter the subject credits shown in your official regulation/marks memo.</div><div class="fields"><input type="hidden" id="collegeS"><div class="field"><label>Regulation</label><div class="inline-select"><select id="regS"><option value="">Loading regulations…</option></select><button type="button" class="btn secondary" id="openRegWizard">＋ Add Regulation</button></div></div><div class="field"><label>Semester</label><select id="semS"><option>1-1</option><option>1-2</option><option>2-1</option><option>2-2</option><option>3-1</option><option>3-2</option><option>4-1</option><option>4-2</option></select></div><div class="field"><label>Branch (optional)</label><select id="branchS"><option value="">Select branch</option><option>CSE</option><option>ECE</option><option>EEE</option><option>Mechanical Engineering</option><option>Civil Engineering</option><option>IT</option><option>Other</option></select></div><div class="field"><label>Record label (optional)</label><input id="attemptS" placeholder="e.g. Regular exams"></div></div><div class="tablewrap" style="margin-top:15px"><table><thead><tr><th>Subject</th><th>Credits</th><th>Letter grade (grade points)</th><th></th></tr></thead><tbody id="subjects"></tbody></table></div><div class="actions"><button class="btn secondary" id="addSubject">＋ Add subject</button><button class="btn" id="calcSgpa">Calculate SGPA</button></div><div class="result" id="sgpaResult"><span>Calculated SGPA</span><strong id="sgpaValue">0.00</strong><span id="sgpaDetails"></span><div class="actions"><button class="btn" id="saveSemester">Save semester</button></div></div></div></section>
 <section class="page" id="page-cgpa"><div class="card"><h3>CGPA Calculator</h3><p class="sub">Enter each semester's SGPA and total applicable credits for a weighted estimate.</p><div class="notice">Official treatment of failed or repeated subjects can differ by regulation. Confirm the rule for your batch.</div><div class="tablewrap"><table><thead><tr><th>Semester</th><th>SGPA</th><th>Total credits</th><th></th></tr></thead><tbody id="cgpaRows"></tbody></table></div><div class="actions"><button class="btn secondary" id="addCgpaRow">＋ Add semester</button><button class="btn" id="calcCgpa">Calculate CGPA</button></div><div class="result" id="cgpaResult"><span>Weighted CGPA</span><strong id="cgpaValue">0.00</strong><span id="cgpaDetails"></span></div></div></section>
 <section class="page" id="page-history"><div class="card"><h3>Academic history</h3><p class="sub">Saved in this browser on this device.</p><div id="historyList" class="empty">No saved semesters yet.</div><div class="actions"><button class="btn secondary" id="exportData">Export my data (JSON)</button><button class="btn danger" id="clearHistory">Clear history</button></div></div></section>
 <section class="page" id="page-backlogs"><div class="card"><h3>Backlog tracker</h3><p class="sub">Track subjects yourself. This list does not automatically change official SGPA/CGPA.</p><div class="fields"><div class="field"><label>Subject name or code</label><input id="backlogName" placeholder="e.g. Engineering Mathematics"></div><div class="field"><label>Semester</label><select id="backlogSem"><option>1-1</option><option>1-2</option><option>2-1</option><option>2-2</option><option>3-1</option><option>3-2</option><option>4-1</option><option>4-2</option></select></div></div><div class="actions"><button class="btn" id="addBacklog">＋ Add backlog</button></div><div id="backlogList" class="empty" style="margin-top:10px">No backlogs recorded.</div></div></section>
-<section class="page" id="page-guide">
-<div class="card"><h3>Available Regulations</h3>
-<p class="sub">R20 and R23 are available. Add a new regulation by uploading a syllabus PDF or entering subjects manually.</p>
-<div class="reg-list" id="regulationChips"><span class="reg-chip">R20</span><span class="reg-chip">R23</span></div>
-<div class="field"><label>Regulation</label><select id="regGuide"><option value="">Loading regulations…</option></select></div>
-<div id="regulationDetails" class="notice" style="margin-top:14px">Choose a regulation to view its catalogue status.</div>
-<div class="actions"><button class="btn" id="openAddRegulation">＋ Add Regulation</button></div>
-<p><a href="https://www.jntua.ac.in/" target="_blank" rel="noopener">JNTUA official website ↗</a></p></div>
-</div>
-
-</section>
-<section class="page" id="page-papers"><div class="card"><h3>Previous Question Papers</h3><p class="sub">Search and upload papers using the same regulation, branch, semester and subject catalogue as SGPA.</p>
+<section class="page" id="page-guide"><div class="card"><h3>Academic Regulations</h3><p class="sub">R20, R23 and published future regulations are available through the SGPA regulation selector. Administrators can add a regulation using the button beside that selector.</p><div id="regulationDetails" class="notice">Published regulations and verified course structures are shared with SGPA and Previous Question Papers.</div></div></section>
+<section class="page" id="page-papers"><div class="card"><h3>Previous Question Papers</h3><p class="sub">Papers use the same college, regulation, branch, semester and subject catalogue as SGPA.</p>
 <div class="fields">
-
+<input type="hidden" id="paperCollege">
 <div class="field"><label>Regulation</label><select id="paperReg"><option value="">Select regulation</option></select></div>
-<div class="field"><label>Semester</label><select id="paperSem"><option value="">Select semester</option></select></div>
-<div class="field"><label>Branch</label><select id="paperBranch"><option value="">Select branch</option></select></div>
-<div class="field"><label>Subject</label><select id="paperSubject"><option value="">All subjects</option></select></div>
-<div class="field"><label>Question paper file (PDF / JPG / PNG / WEBP)</label><input id="paperFile" type="file" accept=".pdf,image/jpeg,image/png,image/webp"></div>
-</div>
-<div class="actions"><button class="btn" id="paperUpload">Upload question paper</button><button class="btn secondary" id="searchPapers">Search papers</button></div>
-<p class="sub" id="paperUploadStatus" aria-live="polite"></p><div id="paperResults"></div>
-<div style="display:none"><input id="paperEmail"><input id="paperPassword"><button id="paperSignUp"></button><button id="paperSignIn"></button><button id="paperSignOut"></button><span id="paperAuthStatus"></span></div>
-</div></section></main><div class="modal-backdrop" id="regModal"><div class="modal">
-<div style="display:flex;justify-content:space-between;align-items:center"><div><h3>Add a regulation</h3><p class="sub">Choose one of the two methods.</p></div><button class="btn secondary" id="closeRegModal">Close</button></div>
-<div class="method-tabs"><button class="active" data-method="pdf">Method 1 · Upload PDF</button><button data-method="manual">Method 2 · Add manually</button></div>
-<div class="fields">
-<div class="field"><label>Regulation code</label><input id="adminRegCode" placeholder="R26"></div>
-<div class="field"><label>Regulation name</label><input id="adminRegName" placeholder="JNTUA B.Tech Regulation R26"></div>
-<div class="field"><label>Start year</label><input id="adminStartYear" type="number" placeholder="2026"></div>
-<div class="field"><label>Branch</label><select id="adminBranch"><option value="">Select branch</option></select></div>
-<div class="field"><label>Semester</label><select id="adminSemester"><option value="">Select semester</option></select></div></div>
-<div id="pdfMethod"><div class="field"><label>Official syllabus PDF</label><input id="regulationPdf" type="file" accept="application/pdf"></div><div class="actions"><button class="btn secondary" id="extractRegulation">Scan PDF and extract subjects</button></div></div>
-<div id="manualMethod" style="display:none"><p class="sub">Enter subjects and credits. Add as many rows as needed.</p><div class="tablewrap"><table><thead><tr><th>Code</th><th>Subject name</th><th>Credits</th><th></th></tr></thead><tbody id="manualSubjects"></tbody></table></div><div class="actions"><button class="btn secondary" id="addManualSubject">＋ Add subject</button></div></div>
-<div id="extractedSubjects" class="tablewrap"></div><div class="actions"><button class="btn" id="publishRegulation" disabled>Publish regulation</button></div><p id="catalogueAdminStatus" class="sub" aria-live="polite">Administrator access required.</p>
-</div></div></div><div class="footer">JNTUA Student Hub · Independent student project · Free to use</div></div>
-<div hidden><input id="collegeS"><input id="collegeGuide"><input id="adminCollege"><input id="paperCollege"></div>
+<div class="field"><label>Semester</label><select id="paperSem"><option value="">Select semester</option></select></div></section></main></div><div class="footer">JNTUA Student Hub · Independent student project · Free to use</div></div>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 const $=id=>document.getElementById(id);const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v));if((k==='jsh_semesters'||k==='jsh_backlogs')&&typeof googleAccessToken!=='undefined'&&googleAccessToken){clearTimeout(window.jshDriveSaveTimer);window.jshDriveSaveTimer=setTimeout(()=>saveToDrive(true),1200)}};let semesters=read('jsh_semesters',[]),backlogs=read('jsh_backlogs',[]),last=null;
@@ -266,6 +236,24 @@ update();
 </script>
 <script src="./supabase-config.js"></script>
 <script src="./sgpa-enhancements.js"></script>
-<script src="./academic-catalogue.js"></script><script src="./regulation-workflow.js"></script>
+<script src="./academic-catalogue.js"></script>
 <script src="./papers.js"></script>
+
+<div class="modal-backdrop" id="regWizard" aria-modal="true" role="dialog">
+ <div class="modal">
+  <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><h2>Add a new regulation</h2><div class="muted">Enter the complete regulation once. Add every branch and semester, then publish.</div></div><button class="btn secondary" id="closeRegWizard">Close</button></div>
+  <div class="wizard-grid">
+   <div class="field"><label>Regulation code</label><input id="v4RegCode" placeholder="R26"></div>
+   <div class="field"><label>Start year</label><input id="v4StartYear" type="number" placeholder="2026"></div>
+   <div class="field"><label>Semester</label><select id="v4Semester"><option value="">Select semester</option><option>1-1</option><option>1-2</option><option>2-1</option><option>2-2</option><option>3-1</option><option>3-2</option><option>4-1</option><option>4-2</option></select></div>
+   <div class="field"><label>Branch</label><select id="v4Branch"><option value="">Select branch</option><option value="01">Civil</option><option value="02">EEE</option><option value="03">Mechanical</option><option value="04">ECE</option><option value="05">CSE</option><option value="12">IT</option><option value="10">EIE</option><option value="30">AI & DS</option><option value="31">CSE (AI)</option><option value="32">CSE (DS)</option><option value="33">CSE (AI & ML)</option></select></div>
+  </div>
+  <div class="field"><label>Upload official syllabus PDF (optional – extract editable data)</label><input id="v4Pdf" type="file" accept="application/pdf"></div>
+  <div class="wizard-actions"><button class="btn secondary" id="v4Scan">Scan PDF and fill subjects</button><button class="btn secondary" id="v4AddRow">＋ Add subject row</button></div>
+  <div class="tablewrap" style="margin-top:14px"><table class="subject-editor"><thead><tr><th>#</th><th>Subject name</th><th>Credits</th><th>Action</th></tr></thead><tbody id="v4SubjectRows"></tbody></table></div>
+  <div class="wizard-actions"><button class="btn secondary" id="v4SaveNext">Save & Next branch / semester</button><button class="btn" id="v4Publish">Publish regulation</button></div>
+  <div class="wizard-status" id="v4Status">Add subjects manually or scan a text-based PDF. Review all extracted data before publishing.</div>
+ </div>
+</div>
+<script src="./regulation-wizard-v4.js"></script>
 </body></html>
