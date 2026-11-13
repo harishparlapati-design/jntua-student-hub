@@ -97,9 +97,9 @@
     if (!client) return;
     try {
       const [b, s, c] = await Promise.all([
-        client.from("academic_branches").select("*").eq("is_active", true).order("branch_name"),
-        client.from("academic_semesters").select("*").eq("is_active", true).order("semester_order"),
-        client.from("academic_colleges").select("*").eq("is_active", true).order("college_name")
+        client.from("academic_branches").select("id,branch_name,branch_code").eq("is_active", true).order("branch_name"),
+        client.from("academic_semesters").select("id,semester_name,semester_code,semester_order").eq("is_active", true).order("semester_order"),
+        client.from("academic_colleges").select("id,college_name,college_type,college_code").eq("is_active", true).order("college_name")
       ]);
       for (const result of [b, s, c]) if (result.error) throw result.error;
       branches = b.data || [];
