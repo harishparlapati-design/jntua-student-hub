@@ -104,7 +104,9 @@
     const redirectTo = window.location.origin + window.location.pathname;
     const { error } = await sb.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo, queryParams: { access_type: "offline", prompt: "consent" } }
+      // Do not force Google consent on every login. Supabase stores the app session;
+      // Drive offline access is not used by this app currently.
+      options: { redirectTo }
     });
     if (error) {
       $("googleConnect").disabled = false;
