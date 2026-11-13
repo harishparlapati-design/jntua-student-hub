@@ -23,10 +23,10 @@
   async function loadBase() {
     const sb = client(); if (!sb) return;
     const [c,r,b,s] = await Promise.all([
-      sb.from("academic_colleges").select("*").eq("is_active", true).order("college_name"),
-      sb.from("academic_regulations").select("*").eq("is_active", true).order("start_year", {ascending:true}),
-      sb.from("academic_branches").select("*").eq("is_active", true).order("branch_name"),
-      sb.from("academic_semesters").select("*").eq("is_active", true).order("semester_order")
+      sb.from("academic_colleges").select("id,college_name,college_type,college_code").eq("is_active", true).order("college_name"),
+      sb.from("academic_regulations").select("id,college_id,regulation_code,regulation_name,start_year,university_name").eq("is_active", true).order("start_year", {ascending:true}),
+      sb.from("academic_branches").select("id,branch_code,branch_name").eq("is_active", true).order("branch_name"),
+      sb.from("academic_semesters").select("id,semester_name,semester_code,semester_order").eq("is_active", true).order("semester_order")
     ]);
     for (const x of [c,r,b,s]) if (x.error) throw x.error;
     state.colleges=c.data||[]; state.regulations=r.data||[]; state.branches=b.data||[]; state.semesters=s.data||[];
@@ -41,7 +41,6 @@
     if (jntua) $("paperCollege").value=jntua.id;
     refreshRegulations();
     bind();
-    await loadSubjectsForSgpa();
     message("Catalogue connected. R20 and R23 are available; subject lists appear when verified catalogue entries exist.");
   }
   function regsForCollege(collegeId) {
