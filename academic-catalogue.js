@@ -31,10 +31,8 @@
     for (const x of [c,r,b,s]) if (x.error) throw x.error;
     state.colleges=c.data||[]; state.regulations=r.data||[]; state.branches=b.data||[]; state.semesters=s.data||[];
     ["collegeS","collegeGuide","adminCollege","paperCollege"].forEach(id=>setOptions(id,state.colleges,collegeName,x=>x.id,"Select college / curriculum"));
-    ["adminBranch","paperBranch"].forEach(id=>setOptions(id,state.branches,branchLabel,x=>x.id,"Select branch"));
-    const allowedBranchCodes = new Set(["CE","ECE","ME","EEE","CSE"]);
-    const sgpaBranches = state.branches.filter(b => allowedBranchCodes.has(String(b.branch_code||"").toUpperCase()));
-    setOptions("branchS", sgpaBranches, b => ({CE:"Civil",ECE:"ECE",ME:"Mechanical",EEE:"EEE",CSE:"CSE"}[String(b.branch_code).toUpperCase()]), b => b.id, "Select branch");
+    ["adminBranch"].forEach(id=>setOptions(id,state.branches,branchLabel,x=>x.id,"Select branch"));
+    refreshBranches();
     ["adminSemester","paperSem","semS"].forEach(id=>setOptions(id,state.semesters,x=>x.semester_name,x=>x.id,"Select semester"));
     refreshRegulations();
     const jntua = state.colleges.find(x=>x.college_code==="JNTUA");
@@ -54,11 +52,26 @@
     if (c.college_type==="autonomous") return state.regulations.filter(r=>r.college_id===collegeId);
     return state.regulations.filter(r=>!r.college_id && (r.university_name||"JNTUA")==="JNTUA");
   }
+  function branchesForCollege(collegeId) {
+    const college=state.colleges.find(x=>x.id===collegeId);
+    if(college?.college_type==="autonomous") {
+      const acepCodes=new Set(["CE","ECE","ME","EEE","CSE"]);
+      return state.branches.filter(b=>acepCodes.has(String(b.branch_code||"").toUpperCase()));
+    }
+    return state.branches;
+  }
+  function refreshBranches() {
+    const sgpaRows=branchesForCollege(val("collegeS"));
+    const paperRows=branchesForCollege(val("paperCollege"));
+    setOptions("branchS",sgpaRows,b=>({CE:"Civil Engineering",ECE:"Electronics and Communication Engineering",ME:"Mechanical Engineering",EEE:"Electrical and Electronics Engineering",CSE:"Computer Science and Engineering"}[String(b.branch_code).toUpperCase()]||branchLabel(b)),b=>b.id,"Select branch");
+    setOptions("paperBranch",paperRows,branchLabel,b=>b.id,"Select branch");
+  }
   function refreshRegulations() {
+    refreshBranches();
     const pairs=[["regS","collegeS"],["regGuide","collegeGuide"],["paperReg","paperCollege"]];
     pairs.forEach(([rid,cid])=>{
       const allRows=regsForCollege(val(cid));
-      const rows=rid==="regS"?allRows.filter(r=>["R20","R23"].includes(r.regulation_code)):allRows;
+      const rows=allRows;
       const previous=$(rid)?.value;
       setOptions(rid,rows,r=>rid==="regS"?r.regulation_code:`${r.regulation_code} — ${r.regulation_name}`,r=>r.id,"Select regulation");
       if(rid==="regS") {
@@ -138,7 +151,18 @@
     if([...el.options].some(o=>o.value===old))el.value=old;
   }
   function updateRegulationDetails(){
-    const r=state.regulations.find(x=>x.id===val("regGuide"));
+    const guideRows=regsForCollege(val("collegeGuide"));
+    const chips=$("regulationChips");
+    if(chips){
+      chips.replaceChildren();
+      guideRows.forEach(reg=>{
+        const chip=document.createElement("span");
+        chip.className="reg-chip";
+        chip.textContent=reg.regulation_code;
+        chips.append(chip);
+      });
+    }
+    const r=guideRows.find(x=>x.id===val("regGuide"));
     if($("regulationDetails"))$("regulationDetails").textContent=r?`${r.regulation_code}: ${r.regulation_name}. ${r.start_year ? "Starting year: "+r.start_year+". " : ""}Subject data is shown only after official course structures have been reviewed and published.`:"Choose a college and regulation.";
   }
   function bind(){
