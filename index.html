@@ -280,6 +280,9 @@ function restoreSgpaDraft(){
 }
 $('subjects').addEventListener('input',saveSgpaDraft);
 $('subjects').addEventListener('change',saveSgpaDraft);
+$('addSubject').addEventListener('click',()=>setTimeout(saveSgpaDraft,0));
+$('subjects').addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(saveSgpaDraft,0)});
+$('calcSgpa').addEventListener('click',()=>setTimeout(saveSgpaDraft,0));
 ['regS','semS','branchS','attemptS'].forEach(id=>$(id).addEventListener('change',saveSgpaDraft));
 $('attemptS').addEventListener('input',saveSgpaDraft);
 restoreSgpaDraft();
