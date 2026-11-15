@@ -32,7 +32,7 @@
     state.colleges=c.data||[]; state.regulations=r.data||[]; state.branches=b.data||[]; state.semesters=s.data||[];
     ["collegeS","collegeGuide","adminCollege","paperCollege"].forEach(id=>setOptions(id,state.colleges,collegeName,x=>x.id,"Select college / curriculum"));
     ["adminBranch","paperBranch","branchS"].forEach(id=>setOptions(id,state.branches,branchLabel,x=>x.id,"Select branch"));
-    ["adminSemester","paperSem","semS"].forEach(id=>setOptions(id,state.semesters,x=>x.semester_name,x=>x.semester_code,"Select semester"));
+    ["adminSemester","paperSem","semS"].forEach(id=>setOptions(id,state.semesters,x=>x.semester_name,x=>x.id,"Select semester"));
     refreshRegulations();
     const jntua = state.colleges.find(x=>x.college_code==="JNTUA");
     const acep = state.colleges.find(x=>x.college_code==="JNTUACEP");
