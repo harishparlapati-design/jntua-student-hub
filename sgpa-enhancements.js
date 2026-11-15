@@ -23,17 +23,16 @@ Add before </body> in index.html:
     const td = document.createElement("td");
     const obtainedInput = document.createElement("input");
     obtainedInput.type = "number"; obtainedInput.min = "0"; obtainedInput.max = "30";
-    obtainedInput.step = ".5"; obtainedInput.placeholder = "Auto";
+    obtainedInput.step = ".5"; obtainedInput.placeholder = "Enter credits";
     obtainedInput.setAttribute("aria-label", "Obtained credits");
     obtainedInput.value = obtained === "" ? "" : obtained;
-    obtainedInput.title = "Editable. Defaults to max credits for passing grades and 0 for F/AB/MP.";
+    obtainedInput.title = "Enter obtained credits manually. Max credits are loaded from the subject catalogue and remain editable.";
     td.appendChild(obtainedInput);
     row.insertBefore(td, cells[2]);
-    const sync = () => {
-      if (obtainedInput.dataset.edited === "yes") return;
-      const gp = Number(gradeSelect.value), max = Number(creditInput.value);
-      obtainedInput.value = Number.isFinite(gp) && gp > 0 && max > 0 ? String(max) : "0";
-    };
+    obtainedInput.addEventListener("input", () => {
+      obtainedInput.dataset.edited = "yes";
+      window.saveSgpaDraft?.();
+    });
     obtainedInput.addEventListener("input", () => { obtainedInput.dataset.edited = "yes"; window.saveSgpaDraft?.(); });
     creditInput.addEventListener("input", sync);
     gradeSelect.addEventListener("change", sync);
