@@ -201,18 +201,26 @@ button:focus-visible{
    <button type="button" class="btn secondary" id="closeRegWizard">Close</button>
   </div>
   <div class="wizard-grid">
-   
    <div class="field"><label>Regulation code</label><input id="v4RegCode" placeholder="R26"></div>
    <div class="field"><label>Start year</label><input id="v4StartYear" type="number" placeholder="2026"></div>
-   <div class="field"><label>Semester</label><select id="v4Semester"><option value="">Select semester</option></select></div>
    <div class="field"><label>Branch</label><select id="v4Branch"><option value="">Select branch</option></select></div>
   </div>
-  <div class="field"><label>Official syllabus PDF (optional; text-based PDFs only)</label><input id="v4Pdf" type="file" accept="application/pdf"></div>
-  <p class="sub">PDF extraction is an estimate. Scanned/image-only PDFs require OCR and are not supported in this version. Check every subject and credit.</p>
-  <div class="wizard-actions"><button type="button" class="btn secondary" id="v4Scan">Scan PDF and fill subjects</button><button type="button" class="btn secondary" id="v4AddRow">＋ Add subject row</button></div>
-  <div class="tablewrap" style="margin-top:14px"><table class="subject-editor"><thead><tr><th>#</th><th>Subject name</th><th>Credits</th><th>Action</th></tr></thead><tbody id="v4SubjectRows"></tbody></table></div>
-  <div class="wizard-actions"><button type="button" class="btn secondary" id="v4SaveNext">Save &amp; Next branch / semester</button><button type="button" class="btn" id="v4Publish">Publish regulation</button></div>
-  <div class="wizard-status" id="v4Status" aria-live="polite">Select a curriculum, branch and semester. Add subjects manually or scan a text-based PDF.</div>
+  <select id="v4Semester" hidden aria-hidden="true"><option value="">Select semester</option></select>
+  <section id="v4SemesterPicker">
+   <h3>Select semester</h3>
+   <div class="v4-semester-grid" id="v4SemesterButtons"></div>
+  </section>
+  <section id="v4Editor" hidden>
+   <h3 id="v4EditorTitle">Subjects</h3>
+   <div class="tablewrap" style="margin-top:12px"><table class="subject-editor"><thead><tr><th>Subject name</th><th>Credits</th><th>Edit</th></tr></thead><tbody id="v4SubjectRows"></tbody></table></div>
+   <div class="wizard-actions">
+    <button type="button" class="btn secondary" id="v4AddRow">＋ Add subjects</button>
+    <button type="button" class="btn secondary" id="v4Back">Back</button>
+    <button type="button" class="btn" id="v4Save">Save</button>
+   </div>
+  </section>
+  <div class="wizard-actions" style="margin-top:18px"><button type="button" class="btn" id="v4Publish">Publish regulation</button></div>
+  <div class="wizard-status" id="v4Status" aria-live="polite">Enter regulation details, choose a branch, then select a semester.</div>
  </div>
 </div>
 
