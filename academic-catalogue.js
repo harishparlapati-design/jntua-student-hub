@@ -35,11 +35,12 @@
     refreshBranches();
     ["adminSemester","paperSem","semS"].forEach(id=>setOptions(id,state.semesters,x=>x.semester_name,x=>x.id,"Select semester"));
     refreshRegulations();
-    const jntua = state.colleges.find(x=>x.college_code==="JNTUA");
     const acep = state.colleges.find(x=>x.college_code==="JNTUACEP");
-    if (jntua) $("collegeS").value=jntua.id;
-    if (jntua) $("collegeGuide").value=jntua.id;
-    if (jntua) $("paperCollege").value=jntua.id;
+    const jntua = state.colleges.find(x=>x.college_code==="JNTUA");
+    const defaultCollege = acep || jntua;
+    if (defaultCollege) $("collegeS").value=defaultCollege.id;
+    if (defaultCollege) $("collegeGuide").value=defaultCollege.id;
+    if (defaultCollege) $("paperCollege").value=defaultCollege.id;
     refreshRegulations();
     bind();
     message("Catalogue connected. College-specific regulations and branch lists are loaded; only verified subject entries are displayed.");
