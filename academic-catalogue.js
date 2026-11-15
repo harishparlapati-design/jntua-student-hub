@@ -241,7 +241,7 @@
   const wrapStyle = document.createElement("style");
   wrapStyle.textContent = `
     #page-sgpa #subjects td:first-child { width:42%; white-space:normal; overflow-wrap:anywhere; word-break:normal; line-height:1.35; }
-    #page-sgpa #subjects td:first-child textarea { display:block; white-space:pre-wrap; overflow-wrap:anywhere; min-width:0; width:100%; min-height:38px; resize:vertical; font:inherit; line-height:1.35; }
+    #page-sgpa #subjects td:first-child textarea { display:block; white-space:pre-wrap; overflow-wrap:anywhere; min-width:0; width:100%; min-height:38px; resize:none; font:inherit; line-height:1.35; }
     #page-sgpa #subjects td:nth-child(2) { width:16%; }
     #page-sgpa #subjects td:nth-child(3) { width:30%; }
     #page-sgpa #subjects td:last-child { width:12%; }
