@@ -88,12 +88,18 @@
     const cid=val("collegeS"), rid=val("regS"), bid=val("branchS"), sid=val("semS");
     // Do not show subject rows until regulation, branch and semester are selected.
     // Clear stale/default rows so subjects from a previous selection cannot remain visible.
+    const subjectTable=$("subjects").closest("table");
+    const addButton=$("addSubject");
     if(!cid||!rid||!bid||!sid){
       $("subjects").replaceChildren();
+      if(subjectTable)subjectTable.hidden=true;
+      if(addButton)addButton.hidden=true;
       const note=document.querySelector("#page-sgpa .notice");
       if(note)note.textContent="Select regulation, branch and semester to display the subjects.";
       return;
     }
+    if(subjectTable)subjectTable.hidden=true;
+    if(addButton)addButton.hidden=true;
     try{
       const rows=await subjectRows(cid,rid,bid,sid);
       // Display order: Mathematics first, then other 3-credit subjects,
@@ -106,12 +112,16 @@
       if(token!==sgpaLoadToken || cid!==val("collegeS") || rid!==val("regS") || bid!==val("branchS") || sid!==val("semS"))return;
       if(!rows.length){
         $("subjects").replaceChildren();
+        if(subjectTable)subjectTable.hidden=true;
+        if(addButton)addButton.hidden=true;
         const note=document.querySelector("#page-sgpa .notice");
         if(note)note.textContent="No verified subjects are published for this selection yet.";
         return;
       }
       $("subjects").replaceChildren();
       rows.forEach(s=>window.addSubject?.(s.subject_name,s.credits,""));
+      if(subjectTable)subjectTable.hidden=false;
+      if(addButton)addButton.hidden=false;
       const note=document.querySelector("#page-sgpa .notice");
       if(note)note.textContent=`Loaded all ${rows.length} subjects for this regulation, semester and branch. Enter obtained credits and select grades.`;
       window.saveSgpaDraft?.();
