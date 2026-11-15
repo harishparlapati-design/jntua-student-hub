@@ -86,8 +86,14 @@
     const token = ++sgpaLoadToken;
     if(!$("subjects"))return;
     const cid=val("collegeS"), rid=val("regS"), bid=val("branchS"), sid=val("semS");
-    // Wait until all three student selections are made.
-    if(!cid||!rid||!bid||!sid)return;
+    // Do not show subject rows until regulation, branch and semester are selected.
+    // Clear stale/default rows so subjects from a previous selection cannot remain visible.
+    if(!cid||!rid||!bid||!sid){
+      $("subjects").replaceChildren();
+      const note=document.querySelector("#page-sgpa .notice");
+      if(note)note.textContent="Select regulation, branch and semester to display the subjects.";
+      return;
+    }
     try{
       const rows=await subjectRows(cid,rid,bid,sid);
       // Display order: Mathematics first, then other 3-credit subjects,
@@ -99,8 +105,9 @@
       // A slower earlier query must never overwrite the latest selection.
       if(token!==sgpaLoadToken || cid!==val("collegeS") || rid!==val("regS") || bid!==val("branchS") || sid!==val("semS"))return;
       if(!rows.length){
+        $("subjects").replaceChildren();
         const note=document.querySelector("#page-sgpa .notice");
-        if(note)note.textContent="No verified subjects are published for this selection yet. Your current subject rows are preserved; you can enter subjects manually.";
+        if(note)note.textContent="No verified subjects are published for this selection yet.";
         return;
       }
       $("subjects").replaceChildren();
