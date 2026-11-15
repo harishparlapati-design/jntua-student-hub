@@ -1,13 +1,13 @@
 {
   "name": "JNTUA Student Hub",
   "short_name": "JNTUA Hub",
-  "description": "Free SGPA and CGPA calculator and academic record hub for JNTUA students.",
+  "description": "JNTUA Student Hub — SGPA, CGPA, academic history, backlogs, regulations and previous question papers.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0b1020",
-  "theme_color": "#101827",
+  "background_color": "#f4f7fb",
+  "theme_color": "#315efb",
   "categories": [
     "education",
     "utilities"
