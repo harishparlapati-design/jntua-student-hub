@@ -257,6 +257,33 @@ $('exportData').onclick=()=>{let blob=new Blob([JSON.stringify({semesters,histor
 $('clearHistory').onclick=()=>{if(confirm('Delete all saved semester history from this device?')){semesters=[];attempts=[];write('jsh_semesters',semesters);write('jsh_history',attempts);update()}};
 
 
+ 
+// Keep the in-progress SGPA form on this device across refreshes.
+const SGPA_DRAFT_KEY='jsh_sgpa_draft';
+function saveSgpaDraft(){
+  const subjects=[...$('subjects').querySelectorAll('tr')].map(row=>{
+    const a=row.querySelectorAll('input');
+    return {name:a[0]?.value||'',credits:a[1]?.value||'',grade:row.querySelector('select')?.value??'',obtainedCredits:a[2]?.value||''};
+  });
+  write(SGPA_DRAFT_KEY,{regulation:$('regS').value,semester:$('semS').value,branch:$('branchS').value,label:$('attemptS').value,subjects});
+}
+function restoreSgpaDraft(){
+  const d=read(SGPA_DRAFT_KEY,null);if(!d)return;
+  if(d.regulation)$('regS').value=d.regulation;
+  if(d.semester)$('semS').value=d.semester;
+  if(d.branch)$('branchS').value=d.branch;
+  $('attemptS').value=d.label||'';
+  if(Array.isArray(d.subjects)&&d.subjects.length){
+    $('subjects').replaceChildren();
+    d.subjects.forEach(s=>addSubject(s.name||'',s.credits||'',s.grade??''));
+  }
+}
+$('subjects').addEventListener('input',saveSgpaDraft);
+$('subjects').addEventListener('change',saveSgpaDraft);
+['regS','semS','branchS','attemptS'].forEach(id=>$(id).addEventListener('change',saveSgpaDraft));
+$('attemptS').addEventListener('input',saveSgpaDraft);
+restoreSgpaDraft();
+
 
 // Google sign-in and cloud sync are handled by student-sync.js.
 
