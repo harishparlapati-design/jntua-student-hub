@@ -8,26 +8,41 @@ Add before </body> in index.html:
   const table = $("subjects")?.closest("table");
   if (!table) return;
 
-  // Keep every subject-name field identical in size; long names scroll inside.
+  // Every subject-name field must match the first row's fixed dimensions.
+  // Disable the native resize grip; long names scroll vertically inside the box.
   const subjectNameStyle = document.createElement("style");
   subjectNameStyle.id = "jsh-subject-name-fixed-size";
   subjectNameStyle.textContent = `
     #subjects textarea[aria-label="Subject name"] {
-      display: block;
-      width: 100%;
-      height: 48px;
-      min-height: 48px;
-      max-height: 48px;
-      box-sizing: border-box;
-      resize: none;
-      overflow-y: auto;
-      overflow-x: hidden;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      line-height: 1.35;
+      display: block !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      height: 48px !important;
+      min-height: 48px !important;
+      max-height: 48px !important;
+      resize: none !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      white-space: pre-wrap !important;
+      overflow-wrap: anywhere !important;
+      line-height: 1.35 !important;
     }
   `;
   document.head.appendChild(subjectNameStyle);
+  function lockSubjectNameBoxes(root = document) {
+    root.querySelectorAll?.('#subjects textarea[aria-label="Subject name"]').forEach(el => {
+      el.rows = 1;
+      el.style.setProperty("width", "100%", "important");
+      el.style.setProperty("height", "48px", "important");
+      el.style.setProperty("min-height", "48px", "important");
+      el.style.setProperty("max-height", "48px", "important");
+      el.style.setProperty("resize", "none", "important");
+      el.style.setProperty("overflow-y", "auto", "important");
+      el.style.setProperty("overflow-x", "hidden", "important");
+    });
+  }
+  lockSubjectNameBoxes();
+  new MutationObserver(() => lockSubjectNameBoxes()).observe($("subjects"), {childList:true, subtree:true});
   const head = table.querySelector("thead tr");
   if (head) head.innerHTML = "<th>Subject name</th><th>Max credits</th><th>Obtained credits</th><th>Grade</th><th></th>";
 
