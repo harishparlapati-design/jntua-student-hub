@@ -201,11 +201,10 @@
           is_active: true
         }));
       }
-      const unique = [...new Map(payload.map(row => [`${row.regulation_id}|${row.branch_id}|${row.semester_id}|${row.subject_code}`, row])).values()];
-      const { error: subjectError } = await client.from("academic_subjects").insert(unique);
+      const { error: subjectError } = await client.from("academic_subjects").insert(payload);
       if (subjectError) throw subjectError;
 
-      say(`Published ${code} for ${college.college_name}: ${batch.length} branch/semester groups and ${unique.length} subjects. Refreshing catalogue…`);
+      say(`Published ${code} for ${college.college_name}: ${batch.length} branch/semester groups and ${payload.length} subjects. Everyone can now see the shared catalogue.`);
       await window.JSHV4?.reload?.();
       batch = [];
       modal(false);
