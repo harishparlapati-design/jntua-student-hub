@@ -99,18 +99,16 @@
       const [b, s, c] = await Promise.all([
         client.from("academic_branches").select("id,branch_name,branch_code").eq("is_active", true).order("branch_name"),
         client.from("academic_semesters").select("id,semester_name,semester_code,semester_order").eq("is_active", true).order("semester_order"),
-        client.from("academic_colleges").select("id,college_name,college_type,college_code").eq("is_active", true).order("college_name")
+        client.from("academic_colleges").select("id,college_name,college_type,college_code").eq("college_code","JNTUACEP").eq("is_active", true).limit(1)
       ]);
       for (const result of [b, s, c]) if (result.error) throw result.error;
-      branches = b.data || [];
+      const allowed = new Set(["CE","EEE","ECE","ME","CSE"]);
+      branches = (b.data || []).filter(row => allowed.has(String(row.branch_code).toUpperCase()));
       semesters = s.data || [];
       colleges = c.data || [];
       fillSelect("v4Branch", branches, row => `${row.branch_name} (${row.branch_code})`, row => row.branch_code, "Select branch");
       fillSelect("v4Semester", semesters, row => row.semester_name, row => row.semester_code, "Select semester");
-      fillSelect("v4College", colleges, row => `${row.college_name}${row.college_type === "autonomous" ? " · Autonomous" : " · Affiliated curriculum"}`, row => row.id, "Select curriculum / college");
-      const defaultCollege = colleges.find(row => row.college_code === "JNTUA") || colleges.find(row => row.college_type !== "autonomous");
-      if (defaultCollege) $("v4College").value = defaultCollege.id;
-      say("Catalogue lists loaded. Select the correct curriculum before adding a regulation.");
+      say("JNTUACEP catalogue loaded. Select a branch and semester.");
     } catch (error) {
       say("Could not load branch, semester and college lists: " + error.message);
     }
@@ -119,8 +117,9 @@
     const client = sb();
     if (!client) return say("Supabase is not connected.");
     try {
-      const collegeId = $("v4College").value;
-      if (!collegeId) throw new Error("Select a curriculum / college.");
+      const college = colleges.find(row => row.college_code === "JNTUACEP");
+      const collegeId = college?.id;
+      if (!collegeId) throw new Error("JNTUACEP college record is unavailable.");
       const current = currentRows();
       const currentHasAny = current.length > 0 || $("v4Semester").value || $("v4Branch").value;
       if (currentHasAny) saveBatch();
@@ -129,9 +128,8 @@
       const year = Number($("v4StartYear").value) || null;
       if (!/^R\d{2,4}$/i.test(code)) throw new Error("Enter a regulation code such as R26.");
       if (!year) throw new Error("Enter the starting year.");
-      const college = colleges.find(row => row.id === collegeId);
-      if (!college) throw new Error("Selected college is not in the active catalogue.");
-      const collegeScope = college.college_type === "autonomous" ? collegeId : null;
+      if (!college) throw new Error("JNTUACEP college is not in the active catalogue.");
+      const collegeScope = collegeId;
 
       const { data: authData, error: authError } = await client.auth.getUser();
       if (authError) throw authError;
