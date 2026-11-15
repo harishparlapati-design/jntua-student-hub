@@ -34,9 +34,10 @@ Add before </body> in index.html:
       window.saveSgpaDraft?.();
     });
     obtainedInput.addEventListener("input", () => { obtainedInput.dataset.edited = "yes"; window.saveSgpaDraft?.(); });
-    creditInput.addEventListener("input", sync);
-    gradeSelect.addEventListener("change", sync);
-    sync();
+    // Subject rows are added from the catalogue and by manual entry.
+    // Do not call an undefined sync() here; that stopped the loader after row one.
+    creditInput.addEventListener("input", () => window.saveSgpaDraft?.());
+    gradeSelect.addEventListener("change", () => window.saveSgpaDraft?.());
   };
 
   // Upgrade rows that the original page created before this add-on loaded.
