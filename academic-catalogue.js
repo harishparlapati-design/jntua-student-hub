@@ -31,7 +31,10 @@
     for (const x of [c,r,b,s]) if (x.error) throw x.error;
     state.colleges=c.data||[]; state.regulations=r.data||[]; state.branches=b.data||[]; state.semesters=s.data||[];
     ["collegeS","collegeGuide","adminCollege","paperCollege"].forEach(id=>setOptions(id,state.colleges,collegeName,x=>x.id,"Select college / curriculum"));
-    ["adminBranch","paperBranch","branchS"].forEach(id=>setOptions(id,state.branches,branchLabel,x=>x.id,"Select branch"));
+    ["adminBranch","paperBranch"].forEach(id=>setOptions(id,state.branches,branchLabel,x=>x.id,"Select branch"));
+    const allowedBranchCodes = new Set(["CE","ECE","ME","EEE","CSE"]);
+    const sgpaBranches = state.branches.filter(b => allowedBranchCodes.has(String(b.branch_code||"").toUpperCase()));
+    setOptions("branchS", sgpaBranches, b => ({CE:"Civil",ECE:"ECE",ME:"Mechanical",EEE:"EEE",CSE:"CSE"}[String(b.branch_code).toUpperCase()]), b => b.id, "Select branch");
     ["adminSemester","paperSem","semS"].forEach(id=>setOptions(id,state.semesters,x=>x.semester_name,x=>x.id,"Select semester"));
     refreshRegulations();
     const jntua = state.colleges.find(x=>x.college_code==="JNTUA");
@@ -55,7 +58,7 @@
     const pairs=[["regS","collegeS"],["regGuide","collegeGuide"],["paperReg","paperCollege"]];
     pairs.forEach(([rid,cid])=>{
       const rows=regsForCollege(val(cid));
-      setOptions(rid,rows,r=>`${r.regulation_code} — ${r.regulation_name}`,r=>r.id,"Select regulation");
+      setOptions(rid,rows,r=>rid==="regS"?r.regulation_code:`${r.regulation_code} — ${r.regulation_name}`,r=>r.id,"Select regulation");
       const r20=rows.find(r=>r.regulation_code==="R20");
       const r23=rows.find(r=>r.regulation_code==="R23");
       const preferred=r23||r20;
