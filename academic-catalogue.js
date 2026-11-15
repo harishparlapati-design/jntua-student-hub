@@ -87,11 +87,22 @@
     loadSubjectsForSgpa().catch(console.error);
     loadPaperSubjects().catch(console.error);
     updateRegulationDetails();
+    if($("guideBranch"))fillGuideBranches();
+    if($("guideSubjectTable"))loadRegulationView();
   }
   async function subjectRows(collegeId, regulationId, branchId, semesterId) {
     const sb=client(); if(!sb||!regulationId||!branchId||!semesterId)return [];
     const q=sb.from("academic_subjects").select("id,subject_code,subject_name,credits,subject_type,regulation_id,branch_id,semester_id").eq("regulation_id",regulationId).eq("branch_id",branchId).eq("semester_id",semesterId).eq("is_active",true).order("subject_code");
-    const {data,error}=await q; if(error)throw error; return data||[];
+    const {data,error}=await q; if(error)throw error;
+    const rows=data||[];
+    const {data:{user}}=await sb.auth.getUser();
+    if(user && rows.length){
+      const {data:overrides,error:overrideError}=await sb.from("academic_subject_credit_overrides").select("subject_id,credits").eq("user_id",user.id).in("subject_id",rows.map(x=>x.id));
+      if(overrideError)throw overrideError;
+      const map=new Map((overrides||[]).map(x=>[x.subject_id,Number(x.credits)]));
+      rows.forEach(x=>{x.official_credits=Number(x.credits);x.personal_credits=map.has(x.id)?map.get(x.id):null;if(map.has(x.id))x.credits=map.get(x.id);});
+    }else rows.forEach(x=>{x.official_credits=Number(x.credits);x.personal_credits=null;});
+    return rows;
   }
   // Ignore older requests when students change regulation / semester / branch quickly.
   let sgpaLoadToken = 0;
@@ -147,7 +158,7 @@
     const rows=await subjectRows(val("paperCollege"),val("paperReg"),val("paperBranch"),val("paperSem"));
     const el=$("paperSubject"); const old=el.value;
     el.replaceChildren(new Option("All subjects",""));
-    rows.forEach(s=>el.add(new Option(s.subject_name,s.subject_name)));
+    rows.forEach(s=>el.add(new Option(s.subject_name+" · "+Number(s.credits).toFixed(2).replace(/\.00$/,"")+" credits",s.subject_name)));
     if([...el.options].some(o=>o.value===old))el.value=old;
   }
   function updateRegulationDetails(){
@@ -165,10 +176,61 @@
     const r=guideRows.find(x=>x.id===val("regGuide"));
     if($("regulationDetails"))$("regulationDetails").textContent=r?`${r.regulation_code}: ${r.regulation_name}. ${r.start_year ? "Starting year: "+r.start_year+". " : ""}Subject data is shown only after official course structures have been reviewed and published.`:"Choose a college and regulation.";
   }
+  async function loadRegulationView(){
+    const table=$("guideSubjectTable"), body=$("guideSubjectRows"), note=$("regulationDetails");
+    if(!table||!body)return;
+    const rid=val("regGuide"),bid=val("guideBranch"),sid=val("guideSemester");
+    body.replaceChildren();table.hidden=true;
+    if(!rid||!bid||!sid){note.textContent="Choose a regulation, branch and semester to view subjects.";return;}
+    try{
+      const rows=await subjectRows(val("collegeGuide"),rid,bid,sid);
+      if(!rows.length){note.textContent="No subjects are published for this selection yet.";return;}
+      const {data:{user}}=await client().auth.getUser();
+      rows.forEach(subject=>{
+        const tr=document.createElement("tr");
+        const code=document.createElement("td");code.textContent=subject.subject_code||"—";
+        const name=document.createElement("td");name.textContent=subject.subject_name;
+        const official=document.createElement("td");official.textContent=Number(subject.official_credits??subject.credits).toFixed(2).replace(/\.00$/,"");
+        const personal=document.createElement("td");
+        if(user){
+          const input=document.createElement("input");input.type="number";input.min="0";input.max="30";input.step="0.5";input.value=String(subject.credits);input.setAttribute("aria-label","Your personal credits for "+subject.subject_name);
+          input.style.cssText="width:92px;min-width:75px";
+          input.addEventListener("change",async()=>{
+            const value=Number(input.value);
+            if(!Number.isFinite(value)||value<0||value>30){input.value=String(subject.credits);return;}
+            try{
+              const {error}=await client().from("academic_subject_credit_overrides").upsert({user_id:user.id,subject_id:subject.id,credits:value,updated_at:new Date().toISOString()},{onConflict:"user_id,subject_id"});
+              if(error)throw error;
+              subject.credits=value;subject.personal_credits=value;
+              note.textContent="Personal credit saved. Only your signed-in account sees this change; the official catalogue remains unchanged.";
+              loadSubjectsForSgpa().catch(console.error);loadPaperSubjects().catch(console.error);
+            }catch(e){note.textContent="Could not save personal credit: "+e.message;input.value=String(subject.credits);}
+          });
+          personal.append(input);
+        }else personal.textContent=official.textContent+" (sign in to customise)";
+        tr.append(code,name,official,personal);body.append(tr);
+      });
+      table.hidden=false;
+      note.textContent=rows.length+" subjects loaded. "+(user?"Edit the Your credits column; changes are private to your account.":"Sign in with Google to set personal credits.");
+    }catch(e){note.textContent="Could not load subjects: "+e.message;}
+  }
+  function fillGuideBranches(){
+    const rows=branchesForCollege(val("collegeGuide"));
+    setOptions("guideBranch",rows,branchLabel,x=>x.id,"Select branch");
+    setOptions("guideSemester",state.semesters,x=>x.semester_name,x=>x.id,"Select semester");
+  }
   function bind(){
     if (eventsBound) return;
     eventsBound = true;
-    ["collegeS","collegeGuide","paperCollege"].forEach(id=>$(id)?.addEventListener("change",refreshRegulations));
+    ["collegeS","collegeGuide","paperCollege"].forEach(id=>$(id)?.addEventListener("change",()=>{
+      refreshRegulations();
+      if(id==="collegeGuide"){fillGuideBranches();loadRegulationView();}
+    }));
+    ["guideBranch","guideSemester","regGuide"].forEach(id=>$(id)?.addEventListener("change",loadRegulationView));
+    document.querySelectorAll("[data-reg-code]").forEach(button=>button.addEventListener("click",()=>{
+      const reg=regsForCollege(val("collegeGuide")).find(x=>x.regulation_code===button.dataset.regCode);
+      if(reg){$("regGuide").value=reg.id;document.querySelectorAll("[data-reg-code]").forEach(x=>x.classList.toggle("active",x===button));loadRegulationView();}
+    }));
     $("regS")?.addEventListener("change",()=>{
       if($("regS").value==="__add_regulation__") {
         $("regS").value="";
