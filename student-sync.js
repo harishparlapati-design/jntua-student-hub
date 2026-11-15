@@ -165,6 +165,7 @@
     sb.auth.onAuthStateChange((event, session) => {
       // Defer database work out of the auth callback to avoid holding the auth lock.
       setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("jsh-auth-changed", { detail: { user: session?.user || null } }));
         if (session?.user) {
           setSignedInUI(session.user);
           if (activeUser?.id !== session.user.id) loadAndSync(session.user);
