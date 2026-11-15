@@ -220,7 +220,7 @@ button:focus-visible{
 
 <script>
 
-const $=id=>document.getElementById(id);const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v));if(k==='jsh_semesters'||k==='jsh_backlogs')window.dispatchEvent(new CustomEvent('jsh-data-changed',{detail:{key:k}}))};let semesters=read('jsh_semesters',[]),backlogs=read('jsh_backlogs',[]),attempts=read('jsh_history',null),last=null;if(!Array.isArray(attempts))attempts=semesters.map(s=>({...s,id:'legacy-'+s.id,createdAt:s.createdAt||new Date().toISOString()}));
+const $=id=>document.getElementById(id);const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v));if(['jsh_semesters','jsh_backlogs','jsh_history','jsh_sgpa_draft'].includes(k))window.dispatchEvent(new CustomEvent('jsh-data-changed',{detail:{key:k}}))};let semesters=read('jsh_semesters',[]),backlogs=read('jsh_backlogs',[]),attempts=read('jsh_history',null),last=null;if(!Array.isArray(attempts))attempts=semesters.map(s=>({...s,id:'legacy-'+s.id,createdAt:s.createdAt||new Date().toISOString()}));
 
 function esc(s){return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
 
