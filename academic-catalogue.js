@@ -73,16 +73,18 @@
   async function loadSubjectsForSgpa() {
     if(!$("subjects"))return;
     const cid=val("collegeS"), rid=val("regS"), bid=val("branchS"), sid=val("semS");
-    // Clear old rows first so changing regulation/branch/semester never leaves stale subjects.
-    $("subjects").replaceChildren();
+    // Never erase manually entered subjects just because a selection is incomplete
+    // or the shared catalogue has no verified rows for it.
     if(!cid||!rid||!bid||!sid)return;
     try{
       const rows=await subjectRows(cid,rid,bid,sid);
       if(!rows.length){
         const note=document.querySelector("#page-sgpa .notice");
-        if(note)note.textContent="No verified subjects are published for this selection yet. Add the official course structure in Regulations.";
+        if(note)note.textContent="No verified subjects are published for this selection yet. Your current subject rows are preserved; you can enter subjects manually.";
         return;
       }
+      // Replace rows only after verified catalogue data has actually loaded.
+      $("subjects").replaceChildren();
       rows.forEach(s=>window.addSubject?.(`${s.subject_code ? s.subject_code+" — " : ""}${s.subject_name}`,s.credits,""));
       const note=document.querySelector("#page-sgpa .notice");
       if(note)note.textContent=`Loaded ${rows.length} verified subjects and credits from the shared catalogue. Select each grade.`;
