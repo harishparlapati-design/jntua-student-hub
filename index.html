@@ -140,9 +140,15 @@ body.theme-night .reg-chip{background:#20395a;color:#d9e4ff;border-color:#405c85
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
 
-/* Compact sun/moon theme toggle */
-.top-theme{width:44px;height:42px;min-width:44px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;border-radius:999px!important;font-size:21px;line-height:1}
-.top-theme .theme-icon{display:inline-flex;align-items:center;justify-content:center;transition:transform .28s ease}
+/* B.Tech student-friendly compact theme switch: white circular control, sun/moon glyph */
+.top-theme{width:46px;height:46px;min-width:46px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;border-radius:50%!important;background:#fff!important;color:#111827!important;border:1px solid #d8deea!important;box-shadow:0 3px 12px rgba(15,23,42,.14);font-size:23px;line-height:1;cursor:pointer}
+.top-theme .theme-icon{display:inline-flex;align-items:center;justify-content:center;transition:transform .28s ease,color .28s ease;font-family:system-ui,sans-serif}
+.top-theme .theme-icon.sun{color:#e6a400}
+.top-theme .theme-icon.moon{color:#111827}
+.top-theme:hover .theme-icon{transform:rotate(-18deg) scale(1.12)}
+.top-theme:active{transform:scale(.92)}
+body.theme-night .top-theme{background:#fff!important;color:#111827!important;border-color:#fff!important}
+@media(max-width:520px){.top-theme{width:42px;height:42px;min-width:42px}}
 .top-theme:active .theme-icon{transform:rotate(25deg) scale(.88)}
 body.theme-night .top-theme{background:#243754;color:#ffe08a;border-color:#405777}
 
@@ -373,7 +379,7 @@ update();
  const body=document.body,themeBtn=document.getElementById('themeToggle'),installBtn=document.getElementById('installApp');
  const savedTheme=localStorage.getItem('jsh_theme')||'light';
  if(savedTheme==='night')body.classList.add('theme-night');
- const paintTheme=()=>{if(themeBtn){const dark=body.classList.contains('theme-night');themeBtn.innerHTML='<span class="theme-icon" aria-hidden="true">'+(dark?'☀':'☾')+'</span>';themeBtn.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme');themeBtn.setAttribute('title',dark?'Switch to light theme':'Switch to dark theme')}};
+ const paintTheme=()=>{if(themeBtn){const dark=body.classList.contains('theme-night');themeBtn.innerHTML='<span class="theme-icon '+(dark?'moon':'sun')+'" aria-hidden="true">'+(dark?'☾':'☀')+'</span>';themeBtn.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme');themeBtn.setAttribute('title',dark?'Switch to light theme':'Switch to dark theme')}};
  paintTheme();
  themeBtn?.addEventListener('click',()=>{body.classList.toggle('theme-night');localStorage.setItem('jsh_theme',body.classList.contains('theme-night')?'night':'light');paintTheme()});
  let installPrompt=null;
