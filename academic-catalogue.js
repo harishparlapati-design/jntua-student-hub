@@ -57,8 +57,15 @@
   function refreshRegulations() {
     const pairs=[["regS","collegeS"],["regGuide","collegeGuide"],["paperReg","paperCollege"]];
     pairs.forEach(([rid,cid])=>{
-      const rows=regsForCollege(val(cid));
+      const allRows=regsForCollege(val(cid));
+      const rows=rid==="regS"?allRows.filter(r=>["R20","R23"].includes(r.regulation_code)):allRows;
+      const previous=$(rid)?.value;
       setOptions(rid,rows,r=>rid==="regS"?r.regulation_code:`${r.regulation_code} — ${r.regulation_name}`,r=>r.id,"Select regulation");
+      if(rid==="regS") {
+        const addOption=new Option("＋ Add Regulation","__add_regulation__");
+        $(rid).add(addOption);
+        if(previous && previous!=="__add_regulation__" && [...$(rid).options].some(o=>o.value===previous)) $(rid).value=previous;
+      }
       const r20=rows.find(r=>r.regulation_code==="R20");
       const r23=rows.find(r=>r.regulation_code==="R23");
       const preferred=r23||r20;
@@ -110,7 +117,15 @@
     if (eventsBound) return;
     eventsBound = true;
     ["collegeS","collegeGuide","paperCollege"].forEach(id=>$(id)?.addEventListener("change",refreshRegulations));
-    ["regS","branchS","semS"].forEach(id=>$(id)?.addEventListener("change",()=>loadSubjectsForSgpa().catch(console.error)));
+    $("regS")?.addEventListener("change",()=>{
+      if($("regS").value==="__add_regulation__") {
+        $("regS").value="";
+        $("openRegWizard")?.click();
+        return;
+      }
+      loadSubjectsForSgpa().catch(console.error);
+    });
+    ["branchS","semS"].forEach(id=>$(id)?.addEventListener("change",()=>loadSubjectsForSgpa().catch(console.error)));
     ["paperReg","paperBranch","paperSem"].forEach(id=>$(id)?.addEventListener("change",()=>loadPaperSubjects().catch(console.error)));
     $("regGuide")?.addEventListener("change",updateRegulationDetails);
   }
