@@ -225,12 +225,28 @@
     eventsBound = true;
     ["collegeS","collegeGuide","paperCollege"].forEach(id=>$(id)?.addEventListener("change",()=>{
       refreshRegulations();
-      if(id==="collegeGuide"){fillGuideBranches();loadRegulationView();}
+      if(id==="collegeGuide"){
+        const selection=$("guideSelection");
+        if(selection)selection.hidden=true;
+        if($("guideBranch"))$("guideBranch").value="";
+        if($("guideSemester"))$("guideSemester").value="";
+        document.querySelectorAll("[data-reg-code]").forEach(x=>x.classList.remove("active"));
+        fillGuideBranches();
+        loadRegulationView();
+      }
     }));
     ["guideBranch","guideSemester","regGuide"].forEach(id=>$(id)?.addEventListener("change",loadRegulationView));
     document.querySelectorAll("[data-reg-code]").forEach(button=>button.addEventListener("click",()=>{
       const reg=regsForCollege(val("collegeGuide")).find(x=>x.regulation_code===button.dataset.regCode);
-      if(reg){$("regGuide").value=reg.id;document.querySelectorAll("[data-reg-code]").forEach(x=>x.classList.toggle("active",x===button));loadRegulationView();}
+      if(reg){
+        $("regGuide").value=reg.id;
+        if($("guideSelection"))$("guideSelection").hidden=false;
+        if($("guideBranch"))$("guideBranch").value="";
+        if($("guideSemester"))$("guideSemester").value="";
+        document.querySelectorAll("[data-reg-code]").forEach(x=>x.classList.toggle("active",x===button));
+        updateRegulationDetails();
+        loadRegulationView();
+      }
     }));
     $("regS")?.addEventListener("change",()=>{
       if($("regS").value==="__add_regulation__") {
@@ -242,7 +258,11 @@
     });
     ["branchS","semS"].forEach(id=>$(id)?.addEventListener("change",()=>loadSubjectsForSgpa().catch(console.error)));
     ["paperReg","paperBranch","paperSem"].forEach(id=>$(id)?.addEventListener("change",()=>loadPaperSubjects().catch(console.error)));
-    $("regGuide")?.addEventListener("change",updateRegulationDetails);
+    $("regGuide")?.addEventListener("change",()=>{
+      if(val("regGuide") && $("guideSelection"))$("guideSelection").hidden=false;
+      updateRegulationDetails();
+      loadRegulationView();
+    });
   }
   async function ensurePdfJs(){
     if(window.pdfjsLib)return;
