@@ -139,13 +139,20 @@ body.theme-night .reg-chip{background:#20395a;color:#d9e4ff;border-color:#405c85
 @media(max-width:520px){.top{align-items:flex-start}.top-actions{gap:6px}.top-install,.top-theme{font-size:12px;padding:8px 10px;min-height:38px}.brand h1{font-size:16px}.brand p{font-size:11px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
+
+/* Compact sun/moon theme toggle */
+.top-theme{width:44px;height:42px;min-width:44px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;border-radius:999px!important;font-size:21px;line-height:1}
+.top-theme .theme-icon{display:inline-flex;align-items:center;justify-content:center;transition:transform .28s ease}
+.top-theme:active .theme-icon{transform:rotate(25deg) scale(.88)}
+body.theme-night .top-theme{background:#243754;color:#ffe08a;border-color:#405777}
+
 </style>
 
 </head>
 
 <body><div class="shell">
 
-<header class="top"><div class="brand"><div class="logo" id="brandAvatar">J</div><div><h1>JNTUA Student Hub</h1><p>Your academic companion</p></div></div><div class="top-actions"><button type="button" class="btn secondary top-theme" id="themeToggle" aria-label="Switch colour theme">☾ Theme</button><button type="button" class="btn top-install" id="installApp">↓ Install App</button></div></header>
+<header class="top"><div class="brand"><div class="logo" id="brandAvatar">J</div><div><h1>JNTUA Student Hub</h1><p>Your academic companion</p></div></div><div class="top-actions"><button type="button" class="btn secondary top-theme" id="themeToggle" aria-label="Switch to dark theme" title="Switch theme"><span class="theme-icon" aria-hidden="true">☾</span></button><button type="button" class="btn top-install" id="installApp">↓ Install App</button></div></header>
 
 <section class="hero"><div class="eyebrow">Built for B.Tech students</div><h2><span id="heroFirstName">Your semester.</span><br>Made simpler.</h2><p>Calculate SGPA and CGPA, keep a record of semesters, and track your academic journey. No account required for calculations.</p></section>
 
@@ -366,7 +373,7 @@ update();
  const body=document.body,themeBtn=document.getElementById('themeToggle'),installBtn=document.getElementById('installApp');
  const savedTheme=localStorage.getItem('jsh_theme')||'light';
  if(savedTheme==='night')body.classList.add('theme-night');
- const paintTheme=()=>{if(themeBtn)themeBtn.textContent=body.classList.contains('theme-night')?'☀ Light theme':'☾ Dark theme'};
+ const paintTheme=()=>{if(themeBtn){const dark=body.classList.contains('theme-night');themeBtn.innerHTML='<span class="theme-icon" aria-hidden="true">'+(dark?'☀':'☾')+'</span>';themeBtn.setAttribute('aria-label',dark?'Switch to light theme':'Switch to dark theme');themeBtn.setAttribute('title',dark?'Switch to light theme':'Switch to dark theme')}};
  paintTheme();
  themeBtn?.addEventListener('click',()=>{body.classList.toggle('theme-night');localStorage.setItem('jsh_theme',body.classList.contains('theme-night')?'night':'light');paintTheme()});
  let installPrompt=null;
