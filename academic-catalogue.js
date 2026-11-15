@@ -201,13 +201,17 @@
     }catch(e){message("Publish failed: "+e.message)}
   }
 
-/* SGPA subject names: no subject codes; wrap long names onto the next line. */
-#page-sgpa #subjects td:first-child{width:42%;white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.35;}
-#page-sgpa #subjects td:first-child input{white-space:normal;min-width:0;width:100%;}
-#page-sgpa #subjects td:nth-child(2){width:16%;}
-#page-sgpa #subjects td:nth-child(3){width:30%;}
-#page-sgpa #subjects td:last-child{width:12%;}
-#page-sgpa #subjects input[type=number]{min-width:60px;}
+  // Keep long subject names readable in the SGPA table and let them wrap naturally.
+  const wrapStyle = document.createElement("style");
+  wrapStyle.textContent = `
+    #page-sgpa #subjects td:first-child { width:42%; white-space:normal; overflow-wrap:anywhere; word-break:normal; line-height:1.35; }
+    #page-sgpa #subjects td:first-child input { white-space:normal; min-width:0; width:100%; }
+    #page-sgpa #subjects td:nth-child(2) { width:16%; }
+    #page-sgpa #subjects td:nth-child(3) { width:30%; }
+    #page-sgpa #subjects td:last-child { width:12%; }
+    #page-sgpa #subjects input[type=number] { min-width:60px; }
+  `;
+  document.head.appendChild(wrapStyle);
   // V4 wizard compatibility: retain the original catalogue implementation and expose a safe reload hook.
   window.JSHV4 = {
     reload: () => loadBase(),
