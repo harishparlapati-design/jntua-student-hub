@@ -7,6 +7,27 @@ Add before </body> in index.html:
   const gradePoints = {"A+":10,"A":9,"B":8,"C":7,"D":6,"E":5,"F":0,"AB":0,"MP":0};
   const table = $("subjects")?.closest("table");
   if (!table) return;
+
+  // Keep every subject-name field identical in size; long names scroll inside.
+  const subjectNameStyle = document.createElement("style");
+  subjectNameStyle.id = "jsh-subject-name-fixed-size";
+  subjectNameStyle.textContent = `
+    #subjects textarea[aria-label="Subject name"] {
+      display: block;
+      width: 100%;
+      height: 48px;
+      min-height: 48px;
+      max-height: 48px;
+      box-sizing: border-box;
+      resize: none;
+      overflow-y: auto;
+      overflow-x: hidden;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.35;
+    }
+  `;
+  document.head.appendChild(subjectNameStyle);
   const head = table.querySelector("thead tr");
   if (head) head.innerHTML = "<th>Subject name</th><th>Max credits</th><th>Obtained credits</th><th>Grade</th><th></th>";
 
