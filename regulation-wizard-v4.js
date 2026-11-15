@@ -19,7 +19,7 @@
     renumber();
   }
   function renumber() {
-    [...$("v4SubjectRows").children].forEach((row, i) => row.querySelector(".rownum").textContent = i + 1);
+    [...$("v4SubjectRows").children].forEach((row, i) => { row.dataset.row = String(i + 1); });
   }
   function currentRows() {
     return [...$("v4SubjectRows").querySelectorAll("tr")].map(row => ({
@@ -165,34 +165,25 @@
       const { data: authData, error: authError } = await client.auth.getUser();
       if (authError) throw authError;
       const user = authData?.user;
-      if (!user) throw new Error("Supabase Auth administrator login is required. Google Drive sign-in alone does not authorise publishing.");
-      const { data: admin, error: adminError } = await client.from("academic_catalogue_admins").select("user_id").eq("user_id", user.id).maybeSingle();
-      if (adminError) throw adminError;
-      if (!admin) throw new Error("Your Supabase Auth UID is not registered as an academic catalogue administrator.");
-
-      let lookup = client.from("academic_regulations").select("id").eq("regulation_code", code);
-      lookup = collegeScope ? lookup.eq("college_id", collegeScope) : lookup.is("college_id", null);
-      const { data: oldRows, error: lookupError } = await lookup.limit(1);
-      if (lookupError) throw lookupError;
-
+      if (!user) throw new Error("Please sign in to your student account before publishing. Your account name will be shown with the shared regulation.");
+      const meta = user.user_metadata || {};
+      const contributor = String(meta.full_name || meta.name || meta.display_name || user.email || "Signed-in student").trim();
       const regulationPayload = {
         college_id: collegeScope,
         university_name: "JNTUA",
         regulation_code: code,
         regulation_name: code,
         start_year: year,
+        submitted_by: user.id,
+        submitted_by_label: contributor,
         is_active: true
       };
-      let regulation;
-      if (oldRows?.length) {
-        const result = await client.from("academic_regulations").update(regulationPayload).eq("id", oldRows[0].id).select().single();
-        if (result.error) throw result.error;
-        regulation = result.data;
-      } else {
-        const result = await client.from("academic_regulations").insert(regulationPayload).select().single();
-        if (result.error) throw result.error;
-        regulation = result.data;
+      const result = await client.from("academic_regulations").insert(regulationPayload).select().single();
+      if (result.error) {
+        if (result.error.code === "23505") throw new Error("This regulation code already exists. Choose a new regulation code instead of replacing the shared catalogue.");
+        throw result.error;
       }
+      const regulation = result.data;
 
       const payload = [];
       for (const group of batch) {
@@ -203,7 +194,7 @@
           regulation_id: regulation.id,
           branch_id: branch.id,
           semester_id: semester.id,
-          subject_code: `${code}-${branch.branch_code}-${group.semester}-${index + 1}`,
+          subject_code: null,
           subject_name: subject.subject_name,
           credits: subject.credits,
           subject_type: "Theory",
@@ -211,7 +202,7 @@
         }));
       }
       const unique = [...new Map(payload.map(row => [`${row.regulation_id}|${row.branch_id}|${row.semester_id}|${row.subject_code}`, row])).values()];
-      const { error: subjectError } = await client.from("academic_subjects").upsert(unique, { onConflict: "regulation_id,branch_id,semester_id,subject_code" });
+      const { error: subjectError } = await client.from("academic_subjects").insert(unique);
       if (subjectError) throw subjectError;
 
       say(`Published ${code} for ${college.college_name}: ${batch.length} branch/semester groups and ${unique.length} subjects. Refreshing catalogue…`);
