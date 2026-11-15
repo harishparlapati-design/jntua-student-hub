@@ -352,6 +352,11 @@
     regulations: () => state.regulations
   };
   window.addEventListener("supabase-ready",()=>loadBase().catch(e=>message("Catalogue error: "+e.message)));
+  window.addEventListener("jsh-auth-changed",()=>{
+    loadSubjectsForSgpa().catch(console.error);
+    loadPaperSubjects().catch(console.error);
+    loadRegulationView().catch(console.error);
+  });
   if(client())loadBase().catch(e=>message("Catalogue error: "+e.message));
   // A periodic read refreshes published regulation choices; it does not crawl external websites.
   setInterval(()=>{if(client())loadBase().catch(()=>{});},6*60*60*1000);
