@@ -16,8 +16,15 @@
     if(!regulationId||!branchId||!semester)throw new Error("Select regulation, semester and branch.");
     const {data:reg,error}=await supabase.from("academic_regulations").select("regulation_code").eq("id",regulationId).single();if(error)throw error;
     const {data:branch,error:be}=await supabase.from("academic_branches").select("branch_code").eq("id",branchId).single();if(be)throw be;
-    const {data:subjects,error:se}=await supabase.from("academic_subjects").select("subject_code,subject_name").eq("regulation_id",regulationId).eq("branch_id",branchId).eq("semester_id",semester).eq("is_active",true);if(se)throw se;
-    return {regulation:reg.regulation_code,semester,branch:branch.branch_code,subjects:subjects||[]};
+    const {data:subjects,error:se}=await supabase.from("academic_subjects").select("id,subject_code,subject_name,credits").eq("regulation_id",regulationId).eq("branch_id",branchId).eq("semester_id",semester).eq("is_active",true);if(se)throw se;
+    let personalMap=new Map();
+    const {data:{user}}=await supabase.auth.getUser();
+    if(user && subjects?.length){
+      const {data:overrides,error:oe}=await supabase.from("academic_subject_credit_overrides").select("subject_id,credits").eq("user_id",user.id).in("subject_id",subjects.map(x=>x.id));
+      if(oe)throw oe;personalMap=new Map((overrides||[]).map(x=>[x.subject_id,Number(x.credits)]));
+    }
+    const visibleSubjects=(subjects||[]).map(x=>({...x,credits:personalMap.has(x.id)?personalMap.get(x.id):Number(x.credits)}));
+    return {regulation:reg.regulation_code,semester,branch:branch.branch_code,subjects:visibleSubjects};
   }
   async function upload(){
     try{
