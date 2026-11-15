@@ -24,7 +24,7 @@
     const sb = client(); if (!sb) return;
     const [c,r,b,s] = await Promise.all([
       sb.from("academic_colleges").select("id,college_name,college_type,college_code").eq("is_active", true).order("college_name"),
-      sb.from("academic_regulations").select("id,college_id,regulation_code,regulation_name,start_year,university_name").eq("is_active", true).order("start_year", {ascending:true}),
+      sb.from("academic_regulations").select("id,college_id,regulation_code,regulation_name,start_year,university_name,submitted_by,submitted_by_label").eq("is_active", true).order("start_year", {ascending:true}),
       sb.from("academic_branches").select("id,branch_code,branch_name").eq("is_active", true).order("branch_name"),
       sb.from("academic_semesters").select("id,semester_name,semester_code,semester_order").eq("is_active", true).order("semester_order")
     ]);
@@ -44,7 +44,7 @@
     // Autonomous-college regulations are scoped to that college.
     const c=state.colleges.find(x=>x.id===collegeId);
     if (!c || c.college_code!=="JNTUACEP") return [];
-    return state.regulations.filter(r=>r.college_id===collegeId && ["R20","R23"].includes(r.regulation_code));
+    return state.regulations.filter(r=>r.college_id===collegeId);
   }
   function branchesForCollege(collegeId) {
     const acepCodes=new Set(["CE","EEE","ECE","ME","CSE"]);
@@ -164,7 +164,7 @@
       });
     }
     const r=guideRows.find(x=>x.id===val("regGuide"));
-    if($("regulationDetails"))$("regulationDetails").textContent=r?`${r.regulation_code}: ${r.regulation_name}. ${r.start_year ? "Starting year: "+r.start_year+". " : ""}Subject data is shown only after official course structures have been reviewed and published.`:"Choose a college and regulation.";
+    if($("regulationDetails"))$("regulationDetails").textContent=r?`${r.regulation_code}: ${r.regulation_name}. ${r.start_year ? "Starting year: "+r.start_year+". " : ""}${r.submitted_by_label ? "Published by: "+r.submitted_by_label+". " : "Shared JNTUACEP catalogue. "}Subjects appear here after they are published.`:"Choose a regulation.";
   }
   async function loadRegulationView(){
     const table=$("guideSubjectTable"), body=$("guideSubjectRows"), note=$("regulationDetails");
