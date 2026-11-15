@@ -148,9 +148,19 @@ button:focus-visible{
 
 <div class="reg-list" id="regulationChips"><span class="reg-chip">R20</span><span class="reg-chip">R23</span></div>
 
-<div class="field"><label>College / Curriculum</label><select id="collegeGuide"><option value="">Loading colleges…</option></select></div><div class="field"><label>Regulation</label><select id="regGuide"><option value="">Loading regulations…</option></select></div>
-
-<div id="regulationDetails" class="notice" style="margin-top:14px">Choose a regulation to view its catalogue status.</div>
+<div class="field"><label>College / Curriculum</label><select id="collegeGuide"><option value="">Loading colleges…</option></select></div>
+<div class="actions" id="regulationButtons" style="margin:12px 0">
+ <button type="button" class="btn secondary" data-reg-code="R20">R20</button>
+ <button type="button" class="btn secondary" data-reg-code="R23">R23</button>
+</div>
+<div class="field"><label>Regulation</label><select id="regGuide"><option value="">Loading regulations…</option></select></div>
+<div class="fields">
+ <div class="field"><label>Branch</label><select id="guideBranch"><option value="">Select branch</option></select></div>
+ <div class="field"><label>Semester</label><select id="guideSemester"><option value="">Select semester</option></select></div>
+</div>
+<div id="regulationDetails" class="notice" style="margin-top:14px">Choose a regulation, branch and semester to view subjects.</div>
+<div class="tablewrap" style="margin-top:12px"><table id="guideSubjectTable" hidden><thead><tr><th>Subject code</th><th>Subject name</th><th>Official credits</th><th>Your credits</th></tr></thead><tbody id="guideSubjectRows"></tbody></table></div>
+<p class="sub" id="guideEditHint">Sign in with Google to save personal credit changes. Your edits are private and do not change the official catalogue.</p>
 
 
 
