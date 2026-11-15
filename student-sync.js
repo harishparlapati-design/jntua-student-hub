@@ -149,8 +149,13 @@
   function scheduleSave() {
     if (!activeUser) return;
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => saveRemote(true), 650);
+    saveTimer = setTimeout(() => saveRemote(true), 250);
   }
+  window.addEventListener("jsh-sgpa-calculated", () => {
+    if (!activeUser) return;
+    clearTimeout(saveTimer);
+    saveRemote(true);
+  });
   function initialize(client) {
     if (sb) return;
     sb = client;
