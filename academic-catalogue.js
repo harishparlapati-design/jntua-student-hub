@@ -80,26 +80,31 @@
     const q=sb.from("academic_subjects").select("id,subject_code,subject_name,credits,subject_type,regulation_id,branch_id,semester_id").eq("regulation_id",regulationId).eq("branch_id",branchId).eq("semester_id",semesterId).eq("is_active",true).order("subject_code");
     const {data,error}=await q; if(error)throw error; return data||[];
   }
+  // Ignore older requests when students change regulation / semester / branch quickly.
+  let sgpaLoadToken = 0;
   async function loadSubjectsForSgpa() {
+    const token = ++sgpaLoadToken;
     if(!$("subjects"))return;
     const cid=val("collegeS"), rid=val("regS"), bid=val("branchS"), sid=val("semS");
-    // Never erase manually entered subjects just because a selection is incomplete
-    // or the shared catalogue has no verified rows for it.
+    // Wait until all three student selections are made.
     if(!cid||!rid||!bid||!sid)return;
     try{
       const rows=await subjectRows(cid,rid,bid,sid);
+      // A slower earlier query must never overwrite the latest selection.
+      if(token!==sgpaLoadToken || cid!==val("collegeS") || rid!==val("regS") || bid!==val("branchS") || sid!==val("semS"))return;
       if(!rows.length){
         const note=document.querySelector("#page-sgpa .notice");
         if(note)note.textContent="No verified subjects are published for this selection yet. Your current subject rows are preserved; you can enter subjects manually.";
         return;
       }
-      // Replace rows only after verified catalogue data has actually loaded.
       $("subjects").replaceChildren();
       rows.forEach(s=>window.addSubject?.(s.subject_name,s.credits,""));
       const note=document.querySelector("#page-sgpa .notice");
-      if(note)note.textContent=`Loaded ${rows.length} subjects and maximum credits from the JNTUA catalogue. Enter obtained credits and select grades.`;
+      if(note)note.textContent=`Loaded all ${rows.length} subjects for this regulation, semester and branch. Enter obtained credits and select grades.`;
       window.saveSgpaDraft?.();
-    }catch(e){console.error(e)}
+    }catch(e){
+      if(token===sgpaLoadToken)console.error("Could not load SGPA subjects:",e);
+    }
   }
   async function loadPaperSubjects(){
     if(!$("paperSubject"))return;
