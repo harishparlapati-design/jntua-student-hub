@@ -90,6 +90,12 @@
     if(!cid||!rid||!bid||!sid)return;
     try{
       const rows=await subjectRows(cid,rid,bid,sid);
+      // Display order: Mathematics first, then other 3-credit subjects,
+      // then remaining non-lab subjects, and all labs at the end.
+      const isLab = s => /lab/i.test(String(s.subject_type||"")) || /\blab\b/i.test(String(s.subject_name||""));
+      const isMath = s => /linear algebra|calculus|mathematics|maths/i.test(String(s.subject_name||""));
+      const rank = s => isMath(s) ? 0 : isLab(s) ? 3 : Number(s.credits) >= 3 ? 1 : 2;
+      rows.sort((a,b) => rank(a)-rank(b) || String(a.subject_code||"").localeCompare(String(b.subject_code||"")));
       // A slower earlier query must never overwrite the latest selection.
       if(token!==sgpaLoadToken || cid!==val("collegeS") || rid!==val("regS") || bid!==val("branchS") || sid!==val("semS"))return;
       if(!rows.length){
