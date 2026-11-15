@@ -85,9 +85,9 @@
       }
       // Replace rows only after verified catalogue data has actually loaded.
       $("subjects").replaceChildren();
-      rows.forEach(s=>window.addSubject?.(`${s.subject_code ? s.subject_code+" — " : ""}${s.subject_name}`,s.credits,""));
+      rows.forEach(s=>window.addSubject?.(s.subject_name,s.credits,""));
       const note=document.querySelector("#page-sgpa .notice");
-      if(note)note.textContent=`Loaded ${rows.length} verified subjects and credits from the shared catalogue. Select each grade.`;
+      if(note)note.textContent=`Loaded ${rows.length} subjects and maximum credits from the JNTUA catalogue. Enter obtained credits and select grades.`;
       window.saveSgpaDraft?.();
     }catch(e){console.error(e)}
   }
@@ -96,7 +96,7 @@
     const rows=await subjectRows(val("paperCollege"),val("paperReg"),val("paperBranch"),val("paperSem"));
     const el=$("paperSubject"); const old=el.value;
     el.replaceChildren(new Option("All subjects",""));
-    rows.forEach(s=>el.add(new Option(`${s.subject_code ? s.subject_code+" — " : ""}${s.subject_name}`,s.subject_name)));
+    rows.forEach(s=>el.add(new Option(s.subject_name,s.subject_name)));
     if([...el.options].some(o=>o.value===old))el.value=old;
   }
   function updateRegulationDetails(){
@@ -200,6 +200,14 @@
       refreshRegulations();
     }catch(e){message("Publish failed: "+e.message)}
   }
+
+/* SGPA subject names: no subject codes; wrap long names onto the next line. */
+#page-sgpa #subjects td:first-child{width:42%;white-space:normal;overflow-wrap:anywhere;word-break:normal;line-height:1.35;}
+#page-sgpa #subjects td:first-child input{white-space:normal;min-width:0;width:100%;}
+#page-sgpa #subjects td:nth-child(2){width:16%;}
+#page-sgpa #subjects td:nth-child(3){width:30%;}
+#page-sgpa #subjects td:last-child{width:12%;}
+#page-sgpa #subjects input[type=number]{min-width:60px;}
   // V4 wizard compatibility: retain the original catalogue implementation and expose a safe reload hook.
   window.JSHV4 = {
     reload: () => loadBase(),
