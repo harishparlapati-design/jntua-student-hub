@@ -53,6 +53,8 @@
       user_id: activeUser.id,
       semesters: readLocal("jsh_semesters"),
       backlogs: readLocal("jsh_backlogs"),
+      history: readLocal("jsh_history"),
+      sgpa_draft: (() => { try { return JSON.parse(localStorage.getItem("jsh_sgpa_draft") || "{}"); } catch { return {}; } })(),
       updated_at: new Date().toISOString()
     };
     const { error } = await sb.from("student_academic_records").upsert(payload, { onConflict: "user_id" });
@@ -73,12 +75,18 @@
       const localSemesters = sameAccount ? readLocal("jsh_semesters") : [];
       const localBacklogs = sameAccount ? readLocal("jsh_backlogs") : [];
       const { data, error } = await sb.from("student_academic_records")
-        .select("semesters,backlogs,updated_at").eq("user_id", user.id).maybeSingle();
+        .select("semesters,backlogs,history,sgpa_draft,updated_at").eq("user_id", user.id).maybeSingle();
       if (error) throw error;
       const mergedSemesters = mergeById(data?.semesters || [], localSemesters, "semester");
       const mergedBacklogs = mergeById(data?.backlogs || [], localBacklogs, "backlog");
+      const localHistory = sameAccount ? readLocal("jsh_history") : [];
+      const mergedHistory = mergeById(data?.history || [], localHistory, "history");
+      const localDraft = sameAccount ? (() => { try { return JSON.parse(localStorage.getItem("jsh_sgpa_draft") || "{}"); } catch { return {}; } })() : {};
+      const restoredDraft = data?.sgpa_draft && Object.keys(data.sgpa_draft).length ? data.sgpa_draft : localDraft;
       localStorage.setItem("jsh_semesters", JSON.stringify(mergedSemesters));
       localStorage.setItem("jsh_backlogs", JSON.stringify(mergedBacklogs));
+      localStorage.setItem("jsh_history", JSON.stringify(mergedHistory));
+      localStorage.setItem("jsh_sgpa_draft", JSON.stringify(restoredDraft));
       localStorage.setItem("jsh_owner_uid", user.id);
       // Keep the existing calculator/history UI in sync with the restored cloud records.
       if (typeof semesters !== "undefined") semesters = mergedSemesters;
@@ -86,6 +94,7 @@
       if (typeof update === "function") update();
       const { error: saveError } = await sb.from("student_academic_records").upsert({
         user_id: user.id, semesters: mergedSemesters, backlogs: mergedBacklogs,
+        history: mergedHistory, sgpa_draft: restoredDraft,
         updated_at: new Date().toISOString()
       }, { onConflict: "user_id" });
       if (saveError) throw saveError;
@@ -118,8 +127,15 @@
     const { error } = await sb.auth.signOut();
     if (error) { setStatus("Sign-out failed: " + error.message); return; }
     activeUser = null;
+    clearTimeout(saveTimer);
+    ["jsh_semesters","jsh_backlogs","jsh_history","jsh_sgpa_draft"].forEach(k => localStorage.removeItem(k));
+    if (typeof semesters !== "undefined") semesters = [];
+    if (typeof backlogs !== "undefined") backlogs = [];
+    if (typeof attempts !== "undefined") attempts = [];
+    if (typeof update === "function") update();
+    if ($("subjects")) $("subjects").replaceChildren();
     setSignedOutUI();
-    setStatus("Signed out. Your records remain saved on this device.");
+    setStatus("Signed out. Your account data is stored privately in the cloud and hidden on this device.");
   }
   function scheduleSave() {
     if (!activeUser) return;
@@ -140,8 +156,15 @@
           if (activeUser?.id !== session.user.id) loadAndSync(session.user);
         } else if (event === "SIGNED_OUT") {
           activeUser = null;
+          clearTimeout(saveTimer);
+          ["jsh_semesters","jsh_backlogs","jsh_history","jsh_sgpa_draft"].forEach(k => localStorage.removeItem(k));
+          if (typeof semesters !== "undefined") semesters = [];
+          if (typeof backlogs !== "undefined") backlogs = [];
+          if (typeof attempts !== "undefined") attempts = [];
+          if (typeof update === "function") update();
+          if ($("subjects")) $("subjects").replaceChildren();
           setSignedOutUI();
-          setStatus("Signed out. Your records remain saved on this device.");
+          setStatus("Signed out. Your account data is stored privately in the cloud and hidden on this device.");
         }
       }, 0);
     });
