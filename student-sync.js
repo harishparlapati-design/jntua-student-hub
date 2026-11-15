@@ -136,6 +136,13 @@
     if (typeof attempts !== "undefined") attempts = [];
     if (typeof update === "function") update();
     if ($("subjects")) $("subjects").replaceChildren();
+    if ($("sgpaResult")) $("sgpaResult").style.display = "none";
+    if ($("sgpaValue")) $("sgpaValue").textContent = "0.00";
+    if ($("sgpaDetails")) $("sgpaDetails").textContent = "";
+    if ($("cgpaResult")) $("cgpaResult").style.display = "none";
+    if ($("cgpaValue")) $("cgpaValue").textContent = "0.00";
+    if ($("cgpaDetails")) $("cgpaDetails").textContent = "";
+    if ($("cgpaRows")) $("cgpaRows").replaceChildren();
     setSignedOutUI();
     setStatus("Signed out. Your account data is stored privately in the cloud and hidden on this device.");
   }
@@ -165,6 +172,13 @@
           if (typeof attempts !== "undefined") attempts = [];
           if (typeof update === "function") update();
           if ($("subjects")) $("subjects").replaceChildren();
+          if ($("sgpaResult")) $("sgpaResult").style.display = "none";
+          if ($("sgpaValue")) $("sgpaValue").textContent = "0.00";
+          if ($("sgpaDetails")) $("sgpaDetails").textContent = "";
+          if ($("cgpaResult")) $("cgpaResult").style.display = "none";
+          if ($("cgpaValue")) $("cgpaValue").textContent = "0.00";
+          if ($("cgpaDetails")) $("cgpaDetails").textContent = "";
+          if ($("cgpaRows")) $("cgpaRows").replaceChildren();
           setSignedOutUI();
           setStatus("Signed out. Your account data is stored privately in the cloud and hidden on this device.");
         }
