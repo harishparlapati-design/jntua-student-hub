@@ -254,7 +254,7 @@ function update(){let c=semesters.reduce((a,s)=>a+Number(s.credits),0),w=semeste
 
 $('exportData').onclick=()=>{let blob=new Blob([JSON.stringify({semesters,backlogs,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='jntua-student-hub-data.json';a.click();URL.revokeObjectURL(url)};
 
-$('clearHistory').onclick=()=>{if(confirm('Delete all saved semester history from this device?')){semesters=[];write('jsh_semesters',semesters);update()}};
+$('clearHistory').onclick=()=>{if(confirm('Delete all saved semester history from this device?')){semesters=[];write('jsh_semesters',semesters);write('jsh_history',[]);update()}};
 
 
 
