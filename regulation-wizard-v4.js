@@ -31,16 +31,49 @@
     const semester = $("v4Semester").value;
     const branch = $("v4Branch").value;
     const rows = currentRows();
-    if (!semester || !branch || !rows.length) throw new Error("Select a semester and branch, then enter at least one subject.");
+    if (!semester || !branch) throw new Error("Select a branch and semester.");
     if (rows.some(row => !row.subject_name || !(row.credits > 0))) throw new Error("Complete every subject name and enter credits greater than zero.");
+    if (!rows.length) throw new Error("Add at least one subject.");
     const key = `${semester}|${branch}`;
     batch = batch.filter(group => group.key !== key);
     batch.push({ key, semester, branch, subjects: rows });
-    say(`Saved locally: ${$("v4Semester").selectedOptions[0].textContent} · ${$("v4Branch").selectedOptions[0].textContent}. ${rows.length} subjects. Choose the next branch/semester or publish.`);
+    say(`Saved ${rows.length} subjects for ${$("v4Semester").selectedOptions[0].textContent} · ${$("v4Branch").selectedOptions[0].textContent}. Select another semester or publish.`);
   }
-  function resetRows() {
+  function resetRows(rows = []) {
     $("v4SubjectRows").replaceChildren();
-    addRow();
+    (rows.length ? rows : [{subject_name:"",credits:""}]).forEach(row => addRow(row.subject_name,row.credits));
+  }
+  function renderSemesterButtons() {
+    const order = ["1-1","2-1","3-1","4-1","1-2","2-2","3-2","4-2"];
+    const rows = [...semesters].sort((a,b) => {
+      const ai=order.indexOf(a.semester_code), bi=order.indexOf(b.semester_code);
+      return (ai<0?99:ai)-(bi<0?99:bi);
+    });
+    const host=$("v4SemesterButtons");
+    host.replaceChildren();
+    rows.forEach(semester => {
+      const button=document.createElement("button");
+      button.type="button";
+      button.className="btn secondary v4-semester-button";
+      button.textContent=semester.semester_code;
+      button.dataset.semesterCode=semester.semester_code;
+      button.onclick=()=>openSemester(semester);
+      host.append(button);
+    });
+  }
+  function openSemester(semester) {
+    if (!$("v4Branch").value) return say("First select a branch.");
+    $("v4Semester").value=semester.semester_code;
+    $("v4EditorTitle").textContent=semester.semester_name;
+    const group=batch.find(item=>item.key===`${semester.semester_code}|${$("v4Branch").value}`);
+    resetRows(group?.subjects||[]);
+    $("v4SemesterPicker").hidden=true;
+    $("v4Editor").hidden=false;
+    say(`Editing ${semester.semester_name} · ${$("v4Branch").selectedOptions[0].textContent}`);
+  }
+  function showSemesterPicker() {
+    $("v4Editor").hidden=true;
+    $("v4SemesterPicker").hidden=false;
   }
   async function loadPdfJs() {
     if (window.pdfjsLib) return;
@@ -108,7 +141,8 @@
       colleges = c.data || [];
       fillSelect("v4Branch", branches, row => `${row.branch_name} (${row.branch_code})`, row => row.branch_code, "Select branch");
       fillSelect("v4Semester", semesters, row => row.semester_name, row => row.semester_code, "Select semester");
-      say("JNTUACEP catalogue loaded. Select a branch and semester.");
+      renderSemesterButtons();
+      say("JNTUACEP catalogue loaded. Select a branch, then choose a semester.");
     } catch (error) {
       say("Could not load branch, semester and college lists: " + error.message);
     }
@@ -120,10 +154,7 @@
       const college = colleges.find(row => row.college_code === "JNTUACEP");
       const collegeId = college?.id;
       if (!collegeId) throw new Error("JNTUACEP college record is unavailable.");
-      const current = currentRows();
-      const currentHasAny = current.length > 0 || $("v4Semester").value || $("v4Branch").value;
-      if (currentHasAny) saveBatch();
-      if (!batch.length) throw new Error("Add and save at least one branch/semester group.");
+      if (!batch.length) throw new Error("Choose a branch and save subjects for at least one semester.");
       const code = $("v4RegCode").value.trim().toUpperCase();
       const year = Number($("v4StartYear").value) || null;
       if (!/^R\d{2,4}$/i.test(code)) throw new Error("Enter a regulation code such as R26.");
@@ -197,19 +228,20 @@
     initialized = true;
     $("openRegWizard")?.addEventListener("click", () => {
       modal(true);
-      if (!$("v4SubjectRows").children.length) addRow();
+      $("v4SemesterPicker").hidden=false;
+      $("v4Editor").hidden=true;
+      batch=[];
+      $("v4SubjectRows").replaceChildren();
       loadMasterData();
     });
     $("closeRegWizard")?.addEventListener("click", () => modal(false));
     $("regWizard")?.addEventListener("click", event => { if (event.target === $("regWizard")) modal(false); });
     $("v4AddRow")?.addEventListener("click", () => addRow());
-    $("v4Scan")?.addEventListener("click", scanPdf);
-    $("v4SaveNext")?.addEventListener("click", () => {
+    $("v4Back")?.addEventListener("click", showSemesterPicker);
+    $("v4Save")?.addEventListener("click", () => {
       try {
         saveBatch();
-        $("v4Semester").value = "";
-        $("v4Branch").value = "";
-        resetRows();
+        showSemesterPicker();
       } catch (error) {
         say(error.message);
       }
