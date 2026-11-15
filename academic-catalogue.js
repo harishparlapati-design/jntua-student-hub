@@ -42,7 +42,7 @@
     if (jntua) $("paperCollege").value=jntua.id;
     refreshRegulations();
     bind();
-    message("Catalogue connected. R20 and R23 are available; subject lists appear when verified catalogue entries exist.");
+    message("Catalogue connected. College-specific regulations and branch lists are loaded; only verified subject entries are displayed.");
   }
   function regsForCollege(collegeId) {
     // NULL college_id denotes the common JNTUA affiliated/non-autonomous curriculum.
