@@ -11,7 +11,7 @@
 
   function addRow(name = "", credits = "") {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td class="rownum"></td><td><input class="v4name" placeholder="Subject name"></td><td><input class="v4credits" type="number" min="0.5" step="0.5" placeholder="Credits"></td><td><button type="button" class="btn danger mini">Remove</button></td>`;
+    tr.innerHTML = `<td><input class="v4name" placeholder="Subject name" aria-label="Subject name"></td><td><input class="v4credits" type="number" min="0.5" step="0.5" placeholder="Credits" aria-label="Credits"></td><td><button type="button" class="btn danger mini" aria-label="Delete subject">×</button></td>`;
     tr.querySelector(".v4name").value = name;
     tr.querySelector(".v4credits").value = credits;
     tr.querySelector("button").onclick = () => { tr.remove(); renumber(); };
