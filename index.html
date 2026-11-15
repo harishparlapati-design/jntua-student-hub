@@ -275,7 +275,7 @@ function restoreSgpaDraft(){
   $('attemptS').value=d.label||'';
   if(Array.isArray(d.subjects)&&d.subjects.length){
     $('subjects').replaceChildren();
-    d.subjects.forEach(s=>addSubject(s.name||'',s.credits||'',s.grade??''));
+    d.subjects.forEach(s=>addSubject(s.name||'',s.credits||'',s.grade??'',s.obtainedCredits??''));
   }
 }
 $('subjects').addEventListener('input',saveSgpaDraft);
