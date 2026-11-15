@@ -91,6 +91,8 @@
       // Keep the existing calculator/history UI in sync with the restored cloud records.
       if (typeof semesters !== "undefined") semesters = mergedSemesters;
       if (typeof backlogs !== "undefined") backlogs = mergedBacklogs;
+      if (typeof attempts !== "undefined") attempts = mergedHistory;
+      if (typeof restoreSgpaDraft === "function") restoreSgpaDraft();
       if (typeof update === "function") update();
       const { error: saveError } = await sb.from("student_academic_records").upsert({
         user_id: user.id, semesters: mergedSemesters, backlogs: mergedBacklogs,
