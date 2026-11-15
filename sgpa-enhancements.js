@@ -42,8 +42,7 @@ Add before </body> in index.html:
 
   // Upgrade rows that the original page created before this add-on loaded.
   const initialRows = [...$("subjects").querySelectorAll("tr")].map(row => {
-    const a = row.querySelectorAll("input");
-    return {name:a[0]?.value||"", credits:a[1]?.value||"", grade:row.querySelector("select")?.value??""};
+    return {name:row.querySelector('[aria-label="Subject name"]')?.value||"", credits:row.querySelector('[aria-label="Credits"]')?.value||"", grade:row.querySelector("select")?.value??""};
   });
   $("subjects").innerHTML = "";
   initialRows.forEach(row => window.addSubject(row.name, row.credits, row.grade));
@@ -52,8 +51,7 @@ Add before </body> in index.html:
   if (typeof oldCollect === "function") window.collectSgpaDraft = function() {
     const d = oldCollect();
     d.subjects = [...$("subjects").querySelectorAll("tr")].map(row => {
-      const a = row.querySelectorAll("input");
-      return {name:a[0]?.value||"", credits:a[1]?.value||"", obtainedCredits:a[2]?.value||"", grade:row.querySelector("select")?.value??""};
+      return {name:row.querySelector('[aria-label="Subject name"]')?.value||"", credits:row.querySelector('[aria-label="Credits"]')?.value||"", obtainedCredits:row.querySelector('[aria-label="Obtained credits"]')?.value||"", grade:row.querySelector("select")?.value??""};
     });
     return d;
   };
@@ -63,7 +61,7 @@ Add before </body> in index.html:
     const saved = d.subjects;
     oldApply({...d, subjects:saved.map(s=>({name:s.name||"",credits:s.credits??"",grade:s.grade??""}))});
     [...$("subjects").querySelectorAll("tr")].forEach((row,i)=>{
-      const input=row.querySelectorAll("input")[2], value=saved[i]?.obtainedCredits;
+      const input=row.querySelector('[aria-label="Obtained credits"]'), value=saved[i]?.obtainedCredits;
       if(input && value!==undefined && value!==""){input.value=value;input.dataset.edited="yes";}
     });
   };
@@ -74,7 +72,7 @@ Add before </body> in index.html:
   function updateTotals(){
     let max=0,got=0;
     $("subjects").querySelectorAll("tr").forEach(row=>{
-      const a=row.querySelectorAll("input"); max+=Number(a[1]?.value)||0; got+=Number(a[2]?.value)||0;
+      max+=Number(row.querySelector('[aria-label="Credits"]')?.value)||0; got+=Number(row.querySelector('[aria-label="Obtained credits"]')?.value)||0;
     });
     totals.textContent=`Total max credits: ${max.toFixed(2).replace(/\.00$/,"")} · Total obtained credits: ${got.toFixed(2).replace(/\.00$/,"")}`;
   }
