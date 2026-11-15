@@ -8,7 +8,7 @@
   const state = { colleges: [], regulations: [], branches: [], semesters: [], subjects: [], extracted: [], pdfText: "" };
   let eventsBound = false;
   const client = () => window.supabaseClient || null;
-  const val = id => $(id)?.value || "";
+  const val = id => $(id)?.value || (["collegeS","collegeGuide","paperCollege"].includes(id) ? (state.colleges.find(x=>x.college_code==="JNTUACEP")?.id || "") : "");
   const setOptions = (id, rows, label, value, first = "Select") => {
     const el = $(id); if (!el) return;
     const previous = el.value;
@@ -30,17 +30,11 @@
     ]);
     for (const x of [c,r,b,s]) if (x.error) throw x.error;
     state.colleges=c.data||[]; state.regulations=r.data||[]; state.branches=b.data||[]; state.semesters=s.data||[];
-    ["collegeS","collegeGuide","adminCollege","paperCollege"].forEach(id=>setOptions(id,state.colleges,collegeName,x=>x.id,"Select college / curriculum"));
+    ["adminCollege"].forEach(id=>setOptions(id,state.colleges.filter(x=>x.college_code==="JNTUACEP"),collegeName,x=>x.id,"Select college"));
     ["adminBranch"].forEach(id=>setOptions(id,state.branches,branchLabel,x=>x.id,"Select branch"));
     refreshBranches();
     ["adminSemester","paperSem","semS"].forEach(id=>setOptions(id,state.semesters,x=>x.semester_name,x=>x.id,"Select semester"));
     refreshRegulations();
-    const acep = state.colleges.find(x=>x.college_code==="JNTUACEP");
-    const jntua = state.colleges.find(x=>x.college_code==="JNTUA");
-    const defaultCollege = acep || jntua;
-    if (defaultCollege) $("collegeS").value=defaultCollege.id;
-    if (defaultCollege) $("collegeGuide").value=defaultCollege.id;
-    if (defaultCollege) $("paperCollege").value=defaultCollege.id;
     refreshRegulations();
     bind();
     message("Catalogue connected. College-specific regulations and branch lists are loaded; only verified subject entries are displayed.");
@@ -49,17 +43,12 @@
     // NULL college_id denotes the common JNTUA affiliated/non-autonomous curriculum.
     // Autonomous-college regulations are scoped to that college.
     const c=state.colleges.find(x=>x.id===collegeId);
-    if (!c) return [];
-    if (c.college_type==="autonomous") return state.regulations.filter(r=>r.college_id===collegeId);
-    return state.regulations.filter(r=>!r.college_id && (r.university_name||"JNTUA")==="JNTUA");
+    if (!c || c.college_code!=="JNTUACEP") return [];
+    return state.regulations.filter(r=>r.college_id===collegeId && ["R20","R23"].includes(r.regulation_code));
   }
   function branchesForCollege(collegeId) {
-    const college=state.colleges.find(x=>x.id===collegeId);
-    if(college?.college_type==="autonomous") {
-      const acepCodes=new Set(["CE","ECE","ME","EEE","CSE"]);
-      return state.branches.filter(b=>acepCodes.has(String(b.branch_code||"").toUpperCase()));
-    }
-    return state.branches;
+    const acepCodes=new Set(["CE","EEE","ECE","ME","CSE"]);
+    return state.branches.filter(b=>acepCodes.has(String(b.branch_code||"").toUpperCase()));
   }
   function refreshBranches() {
     const sgpaRows=branchesForCollege(val("collegeS"));
@@ -223,18 +212,7 @@
   function bind(){
     if (eventsBound) return;
     eventsBound = true;
-    ["collegeS","collegeGuide","paperCollege"].forEach(id=>$(id)?.addEventListener("change",()=>{
-      refreshRegulations();
-      if(id==="collegeGuide"){
-        const selection=$("guideSelection");
-        if(selection)selection.hidden=true;
-        if($("guideBranch"))$("guideBranch").value="";
-        if($("guideSemester"))$("guideSemester").value="";
-        document.querySelectorAll("[data-reg-code]").forEach(x=>x.classList.remove("active"));
-        fillGuideBranches();
-        loadRegulationView();
-      }
-    }));
+    $("guideAddRegulation")?.addEventListener("click",()=>$("openRegWizard")?.click());
     ["guideBranch","guideSemester","regGuide"].forEach(id=>$(id)?.addEventListener("change",loadRegulationView));
     document.querySelectorAll("[data-reg-code]").forEach(button=>button.addEventListener("click",()=>{
       const reg=regsForCollege(val("collegeGuide")).find(x=>x.regulation_code===button.dataset.regCode);
