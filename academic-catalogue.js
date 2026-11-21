@@ -127,9 +127,11 @@
       if(!rows.length){
         $("subjects").replaceChildren();
         if(subjectTable)subjectTable.hidden=true;
-        if(addButton)addButton.hidden=true;
+        if(addButton)addButton.hidden=false;
+        // Even without a published catalogue, keep any manually entered draft for this semester.
+        window.restoreSgpaDraftForCurrentSelection?.();
         const note=document.querySelector("#page-sgpa .notice");
-        if(note)note.textContent="No verified subjects are published for this selection yet.";
+        if(note)note.textContent="No verified subjects are published for this selection yet. You can still enter subjects manually; your draft is saved per semester.";
         return;
       }
       $("subjects").replaceChildren();
