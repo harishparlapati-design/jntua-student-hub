@@ -35,7 +35,10 @@
     refreshBranches();
     ["adminSemester","paperSem","semS"].forEach(id=>setOptions(id,state.semesters,x=>x.semester_name,x=>x.id,"Select semester"));
     refreshRegulations();
-    refreshRegulations();
+    // The SGPA form loads before Supabase catalogue options exist. Re-apply the
+    // saved selector values only after regulation/branch/semester options are ready.
+    window.restoreSgpaDraft?.();
+    loadSubjectsForSgpa().catch(console.error);
     bind();
     message("Catalogue connected. College-specific regulations and branch lists are loaded; only verified subject entries are displayed.");
   }
