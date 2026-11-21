@@ -4,7 +4,7 @@
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  let sb = null, activeUser = null, syncing = false, saveTimer = null;
+  let sb = null, activeUser = null, syncing = false, pendingSync = false, saveTimer = null;
   const readLocal = key => {
     try { const value = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(value) ? value : []; }
     catch { return []; }
@@ -48,7 +48,8 @@
     return [...map.values()];
   };
   async function saveRemote(showMessage = false) {
-    if (!sb || !activeUser || syncing) return;
+    if (!sb || !activeUser) return;
+    if (syncing) { pendingSync = true; return; }
     const payload = {
       user_id: activeUser.id,
       semesters: readLocal("jsh_semesters"),
@@ -106,6 +107,11 @@
       setStatus("Signed in, but database sync needs attention: " + error.message);
     } finally {
       syncing = false;
+      if (pendingSync && activeUser?.id === user.id) {
+        pendingSync = false;
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => saveRemote(true), 0);
+      }
     }
   }
   async function signIn() {
