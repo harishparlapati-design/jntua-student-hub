@@ -322,33 +322,72 @@ $('clearHistory').onclick=()=>{if(confirm('Delete all saved semester history fro
 
 
  
-// Keep the in-progress SGPA form on this device across refreshes.
+// Keep a separate SGPA draft for every regulation + branch + semester.
+// Changing the selector must never overwrite another semester's in-progress marks.
 const SGPA_DRAFT_KEY='jsh_sgpa_draft';
-function saveSgpaDraft(){
+function sgpaSelectionKey(){
+  const r=$('regS').value,b=$('branchS').value,s=$('semS').value;
+  return r&&b&&s?[r,b,s].join('|'):'__default__';
+}
+function readSgpaDraftStore(){
+  const raw=read(SGPA_DRAFT_KEY,null);
+  if(raw&&raw.version===2&&raw.bySelection&&typeof raw.bySelection==='object')return raw;
+  const migrated={version:2,activeSelection:'',bySelection:{}};
+  if(raw&&Array.isArray(raw.subjects)){
+    const key=[raw.regulation,raw.branch,raw.semester].every(Boolean)?[raw.regulation,raw.branch,raw.semester].join('|'):'__default__';
+    migrated.activeSelection=key;migrated.bySelection[key]=raw;
+  }
+  return migrated;
+}
+let lastSgpaSelection='__default__';
+function saveSgpaDraft(key=sgpaSelectionKey()){
   const subjects=[...$('subjects').querySelectorAll('tr')].map(row=>{
     const a=row.querySelectorAll('input');
-    return {name:a[0]?.value||'',credits:a[1]?.value||'',grade:row.querySelector('select')?.value??'',obtainedCredits:a[2]?.value||''};
+    return {name:row.querySelector('[aria-label="Subject name"]')?.value||'',credits:row.querySelector('[aria-label="Credits"]')?.value||'',grade:row.querySelector('select')?.value??'',obtainedCredits:row.querySelector('[aria-label="Obtained credits"]')?.value||''};
   });
-  write(SGPA_DRAFT_KEY,{regulation:$('regS').value,semester:$('semS').value,branch:$('branchS').value,label:$('attemptS').value,subjects});
+  const store=readSgpaDraftStore();
+  store.bySelection[key]={regulation:$('regS').value,semester:$('semS').value,branch:$('branchS').value,label:$('attemptS').value,subjects,savedAt:new Date().toISOString()};
+  store.activeSelection=sgpaSelectionKey();
+  write(SGPA_DRAFT_KEY,store);
+}
+function restoreSgpaDraftForCurrentSelection(){
+  const store=readSgpaDraftStore(),draft=store.bySelection[sgpaSelectionKey()];
+  if(!draft||!Array.isArray(draft.subjects)||!draft.subjects.length)return false;
+  $('subjects').replaceChildren();
+  draft.subjects.forEach(s=>addSubject(s.name||'',s.credits||'',s.grade??'',s.obtainedCredits??''));
+  $('attemptS').value=draft.label||'';
+  return true;
 }
 function restoreSgpaDraft(){
-  const d=read(SGPA_DRAFT_KEY,null);if(!d)return;
-  if(d.regulation)$('regS').value=d.regulation;
-  if(d.semester)$('semS').value=d.semester;
-  if(d.branch)$('branchS').value=d.branch;
-  $('attemptS').value=d.label||'';
-  if(Array.isArray(d.subjects)&&d.subjects.length){
-    $('subjects').replaceChildren();
-    d.subjects.forEach(s=>addSubject(s.name||'',s.credits||'',s.grade??'',s.obtainedCredits??''));
+  const store=readSgpaDraftStore(),active=store.activeSelection;
+  if(active&&store.bySelection[active]){
+    const d=store.bySelection[active];
+    if(d.regulation)$('regS').value=d.regulation;
+    if(d.semester)$('semS').value=d.semester;
+    if(d.branch)$('branchS').value=d.branch;
+    $('attemptS').value=d.label||'';
+    if(Array.isArray(d.subjects)&&d.subjects.length){
+      $('subjects').replaceChildren();
+      d.subjects.forEach(s=>addSubject(s.name||'',s.credits||'',s.grade??'',s.obtainedCredits??''));
+    }
   }
+  lastSgpaSelection=sgpaSelectionKey();
 }
-$('subjects').addEventListener('input',saveSgpaDraft);
-$('subjects').addEventListener('change',saveSgpaDraft);
-$('addSubject').addEventListener('click',()=>setTimeout(saveSgpaDraft,0));
-$('subjects').addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(saveSgpaDraft,0)});
-$('calcSgpa').addEventListener('click',()=>setTimeout(saveSgpaDraft,0));
-['regS','semS','branchS','attemptS'].forEach(id=>$(id).addEventListener('change',saveSgpaDraft));
-$('attemptS').addEventListener('input',saveSgpaDraft);
+window.saveSgpaDraft=saveSgpaDraft;
+window.restoreSgpaDraftForCurrentSelection=restoreSgpaDraftForCurrentSelection;
+$('subjects').addEventListener('input',()=>saveSgpaDraft());
+$('subjects').addEventListener('change',()=>saveSgpaDraft());
+$('addSubject').addEventListener('click',()=>setTimeout(()=>saveSgpaDraft(),0));
+$('subjects').addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(()=>saveSgpaDraft(),0)});
+$('calcSgpa').addEventListener('click',()=>setTimeout(()=>saveSgpaDraft(),0));
+// Capture selector changes before the catalogue loader replaces the visible rows.
+['regS','semS','branchS'].forEach(id=>$(id).addEventListener('change',()=>{
+  saveSgpaDraft(lastSgpaSelection);
+  lastSgpaSelection=sgpaSelectionKey();
+  const store=readSgpaDraftStore();store.activeSelection=lastSgpaSelection;write(SGPA_DRAFT_KEY,store);
+},true));
+$('attemptS').addEventListener('input',()=>saveSgpaDraft());
+$('attemptS').addEventListener('change',()=>saveSgpaDraft());
 restoreSgpaDraft();
 
 
