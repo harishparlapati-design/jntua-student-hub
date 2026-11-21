@@ -1,5 +1,5 @@
 /* JNTUA Student Hub — fast offline app shell. */
-const CACHE_NAME = "jntua-student-hub-v3";
+const CACHE_NAME = "jntua-student-hub-v4";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/jntua-hub.svg"];
 
 self.addEventListener("install", event => event.waitUntil(
