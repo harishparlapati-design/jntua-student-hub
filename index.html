@@ -346,7 +346,8 @@ function saveSgpaDraft(key=sgpaSelectionKey()){
     return {name:row.querySelector('[aria-label="Subject name"]')?.value||'',credits:row.querySelector('[aria-label="Credits"]')?.value||'',grade:row.querySelector('select')?.value??'',obtainedCredits:row.querySelector('[aria-label="Obtained credits"]')?.value||''};
   });
   const store=readSgpaDraftStore();
-  store.bySelection[key]={regulation:$('regS').value,semester:$('semS').value,branch:$('branchS').value,label:$('attemptS').value,subjects,savedAt:new Date().toISOString()};
+  const parts=key==='__default__'?[]:key.split('|');
+  store.bySelection[key]={regulation:parts.length===3?parts[0]:$('regS').value,branch:parts.length===3?parts[1]:$('branchS').value,semester:parts.length===3?parts[2]:$('semS').value,label:$('attemptS').value,subjects,savedAt:new Date().toISOString()};
   store.activeSelection=sgpaSelectionKey();
   write(SGPA_DRAFT_KEY,store);
 }
