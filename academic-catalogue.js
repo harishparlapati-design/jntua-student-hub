@@ -138,7 +138,8 @@
       if(addButton)addButton.hidden=false;
       const note=document.querySelector("#page-sgpa .notice");
       if(note)note.textContent=`Loaded all ${rows.length} subjects for this regulation, semester and branch. Enter obtained credits and select grades.`;
-      window.saveSgpaDraft?.();
+      // Restore this selection only; never replace another semester draft with blank catalogue rows.
+      window.restoreSgpaDraftForCurrentSelection?.();
     }catch(e){
       if(token===sgpaLoadToken)console.error("Could not load SGPA subjects:",e);
     }
