@@ -73,13 +73,17 @@
     try {
       const previousOwner = localStorage.getItem("jsh_owner_uid");
       const sameAccount = !previousOwner || previousOwner === user.id;
-      const localSemesters = sameAccount ? readLocal("jsh_semesters") : [];
-      const localBacklogs = sameAccount ? readLocal("jsh_backlogs") : [];
+      let localSemesters = sameAccount ? readLocal("jsh_semesters") : [];
+      let localBacklogs = sameAccount ? readLocal("jsh_backlogs") : [];
       const { data, error } = await sb.from("student_academic_records")
         .select("semesters,backlogs,history,sgpa_draft,updated_at").eq("user_id", user.id).maybeSingle();
       if (error) throw error;
       const mergedSemesters = mergeById(data?.semesters || [], localSemesters, "semester");
       const mergedBacklogs = mergeById(data?.backlogs || [], localBacklogs, "backlog");
+      // Re-read local data after the network request: the student may have edited
+      // records while the cloud restore was in flight. Never overwrite those edits.
+      localSemesters = sameAccount ? readLocal("jsh_semesters") : [];
+      localBacklogs = sameAccount ? readLocal("jsh_backlogs") : [];
       const localHistory = sameAccount ? readLocal("jsh_history") : [];
       const mergedHistory = mergeById(data?.history || [], localHistory, "history");
       const localDraft = sameAccount ? (() => { try { return JSON.parse(localStorage.getItem("jsh_sgpa_draft") || "{}"); } catch { return {}; } })() : {};
